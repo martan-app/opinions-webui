@@ -3,6 +3,7 @@ const nextConfig = {
   experimental: {
     appDir: false,
   },
+  poweredByHeader: false,
 }
 
 module.exports = nextConfig
