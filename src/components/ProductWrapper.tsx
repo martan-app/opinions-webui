@@ -87,12 +87,20 @@ export default function ProductsWrapper({
     }
   }, [notification.reviews, product.id]);
 
+  function getPictureUrl() {
+    let url = "https://img.icons8.com/ios/100/null/no-image.png"
+    if (product.pictures && product.pictures.length) {
+      url = product.pictures[0]
+    }
+    return url
+  }
+
   return (
-    <Accordion.Item value="1" key={product.label}>
+    <Accordion.Item value={product.id} key={product.label}>
       <Accordion.Control>
         <Product
           name={product.name}
-          image={product?.pictures[0]}
+          image={getPictureUrl()}
           ref={$rating}
         />
       </Accordion.Control>

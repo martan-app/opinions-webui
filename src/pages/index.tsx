@@ -1,7 +1,7 @@
-import { Box, Button, Flex, Text } from "@mantine/core";
+import { Box, Button, Flex, Text, MantineProvider } from "@mantine/core";
 import { verify } from "jsonwebtoken";
 import { useRef } from "react";
-import supabase from "../../src/utils/supabase-client";
+import supabase from "../utils/supabase-client";
 import { Logo } from "../components/Logo";
 import NotificationsComponent, {
   NotificationsHandle,
@@ -73,7 +73,7 @@ export async function getServerSideProps(context: any) {
   if (notificationBody) {
     const { data: products, error: prodErr } = await supabase
       .from("products")
-      .select("id, name, sku, url, pictures")
+      .select("id, name, sku, url, pictures, product_id")
       .in("id", notificationBody.orders.products);
 
     if (products) {
@@ -118,55 +118,70 @@ export default function Home(props: any) {
   }
 
   return (
-    <Box
-      sx={{
-        width: "100%",
+    <MantineProvider
+      theme={{
+        colors: {
+          brand: [
+            "#DC493A",
+            "#4392F1",
+            "#ECE8EF",
+            "#E3EBFF",
+            "#E7F0FF",
+          ],
+        },
+        primaryColor: "brand",
       }}
     >
-      <Flex
+      <Box
         sx={{
-          maxWidth: "590px",
           width: "100%",
-          margin: "50px auto",
-          background: "#fff",
         }}
-        mih={50}
-        gap="xl"
-        justify="flex-start"
-        align="center"
-        direction="column"
-        wrap="wrap"
       >
-        {notification.stores && notification.stores.logo_url && (
-          <Logo src={notification.stores.logo_url} />
-        )}
+        <Flex
+          sx={{
+            maxWidth: "590px",
+            width: "100%",
+            margin: "50px auto",
+            background: "#fff",
+          }}
+          mih={50}
+          gap="xl"
+          justify="flex-start"
+          align="center"
+          direction="column"
+          wrap="wrap"
+        >
+          {notification.stores && notification.stores.logo_url && (
+            <Logo src={notification.stores.logo_url} />
+          )}
 
-        <Text span p="xl" align="center">
-          Sua avaliação é fundamental e pode ajudar outros Clientes a saberem
-          mais sobre a qualidade dos produtos. Obrigado por sua contribuição ;
-        </Text>
+          <Text span p="xl" align="center">
+            Sua avaliação é fundamental e pode ajudar outros Clientes a saberem
+            mais sobre a qualidade dos produtos. Obrigado por sua contribuição ;
+          </Text>
 
-        <Products
-          products={notification.productBody}
-          notification={notification}
-          alertComponent={$alert.current}
-        />
+          <Products
+            products={notification.productBody}
+            notification={notification}
+            alertComponent={$alert.current}
+          />
 
-        <Text span p="xl" align="center">
-          Você pode cancelar o recebimento dos comunicados relacionados as
-          avaliacoes nos e-mails enviados.
-        </Text>
+          <Text span p="xl" align="center">
+            Você pode cancelar o recebimento dos comunicados relacionados as
+            avaliacoes nos e-mails enviados.
+          </Text>
 
-        {renderButton()}
+          {renderButton()}
 
-        <Text span>
-          © {new Date().getFullYear()}{" "}
-          {notification.stores && notification.stores.name}. Todos os direitos
-          reservados.
-        </Text>
-      </Flex>
+          <Text span>
+            © {new Date().getFullYear()}{" "}
+            {notification.stores && notification.stores.name}. Todos os direitos
+            reservados.
+          </Text>
+        </Flex>
 
-      <NotificationsComponent ref={$alert} />
-    </Box>
+        <NotificationsComponent ref={$alert} />
+      </Box>
+    </MantineProvider>
   );
 }
