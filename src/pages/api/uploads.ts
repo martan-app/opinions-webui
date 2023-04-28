@@ -1,72 +1,98 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import formidable from "formidable";
-import supabase from "./../../utils/supabase-client";
-import uuid from "uuid-random";
 import multiparty from "multiparty"
-type Data = any;
+import { NextRequest } from "next/server"
+import uuid from "uuid-random"
+import supabase from "../../utils/supabase-client"
 
 export const config = {
   api: {
     bodyParser: false,
   },
-};
+  runtime: 'edge',
+}
 
 const saveFile = async (files: any) => {
-  const success: any = [];
-  const errors: any = [];
+  const success: any = []
+  const errors: any = []
   const promises = files.map(async (file: any) => {
     const { data, error } = await supabase.storage
       .from("testeupload")
       .upload(`photos/${file.newFilename}`, file, {
         upsert: true,
-        contentType: file.mimetype
-      });
+        contentType: file.mimetype,
+      })
 
     const { data: publicURL } = supabase.storage
       .from("testeupload")
-      .getPublicUrl(`photos/${file.newFilename}`);
+      .getPublicUrl(`photos/${file.newFilename}`)
 
     if (data) {
       success.push({
         _id: uuid(),
         url: publicURL,
         size: "original",
-      });
+      })
     } else if (error) {
-      errors.push(error);
+      errors.push(error)
     }
-  });
+  })
 
-  await Promise.all(promises);
+  await Promise.all(promises)
   return Promise.resolve({
     data: success,
     errors,
-  });
-};
+  })
+}
 
-const post = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+const post = async (req: NextRequest) => {
   // const form = new formidable.IncomingForm({ multiples: true, keepExtensions: true });
-  const form = new multiparty.Form();
+  const form = new multiparty.Form()
 
   form.parse(req, async function (err, fields, { files }) {
-    const { data, errors } = await saveFile(files);
-    return data ? res.status(201).send(data) : res.status(400).send(errors);
-  });
-};
+    const { data, errors } = await saveFile(files)
+    return data
+      ? new Response(JSON.stringify(data), {
+          status: 201,
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+      : new Response(JSON.stringify(errors), {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+  })
+}
 
 export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
+  req: NextRequest
 ) {
   switch (req.method) {
     case "POST":
-      post(req, res);
-      break;
+      post(req)
+      break
     case "PUT":
     case "DELETE":
     case "PATCH":
     case "GET":
-      res.status(405).send("method not allowed");
-      break;
+      return new Response(
+        JSON.stringify({
+          status: 405,
+          error_code: 105,
+          message: "Metodo não permitido",
+          user_message: {
+            en_us: "Method not allowed",
+            pt_br: "Metodo não permitido",
+          },
+          more_info: null,
+        }),
+        {
+          status: 405,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      )
   }
 }
