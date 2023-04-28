@@ -63,7 +63,7 @@ export default function Form({
       body: JSON.stringify({
         ...values,
         order,
-        product: product.id,
+        product: product.product_id,
         rating: getRating(),
         customer,
         notification_id: notificationId

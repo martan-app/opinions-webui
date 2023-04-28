@@ -20,7 +20,7 @@ import {
 } from "@mantine/dropzone";
 import { useState } from "react";
 import uuid from "uuid-random";
-import supabase from "./../utils/supabase-client";
+import supabase from "../utils/supabase-client";
 
 interface Props extends DropzoneProps {
   onUpload: (files: any) => void;

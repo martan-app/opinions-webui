@@ -3,7 +3,7 @@ import { Box, Button, FileInput, Flex } from "@mantine/core";
 
 import { useState } from "react";
 import uuid from "uuid-random";
-import supabase from "./../utils/supabase-client";
+import supabase from "../utils/supabase-client";
 
 interface Props {
   hasPictures: boolean;

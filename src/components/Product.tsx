@@ -27,7 +27,7 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
   useImperativeHandle(ref, () => ({
     getRating: () => rating,
     setReadOnly: () => __isReadOnly(true),
-    setRating: (rating) => __rating(rating)
+    setRating: (rating) => __rating(rating),
   }));
 
   return (
@@ -40,6 +40,15 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         withPlaceholder
         radius="md"
         fit="cover"
+        sx={{
+          transition: "transform 1s, filter 2s ease-in-out",
+          filter: "blur(0.3px)",
+          transform: "scale(1.1)",
+          "&:hover": {
+            filter: "blur(0)",
+            transform: "scale(1)",
+          },
+        }}
       />
 
       <div>

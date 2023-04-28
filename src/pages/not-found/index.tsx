@@ -55,7 +55,7 @@ export default function NotFoundImage() {
         cols={2}
         breakpoints={[{ maxWidth: "sm", cols: 1, spacing: 40 }]}
       >
-        <Image src={image.src} className={classes.mobileImage} />
+        <Image src={image.src} className={classes.mobileImage} alt="not found image"/>
         <div>
           <Title className={classes.title}>
             Aff, não era pra ter acontecido isto...
