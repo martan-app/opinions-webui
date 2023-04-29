@@ -8,7 +8,7 @@ export default function App(props: AppProps) {
   return (
     <>
       <Head>
-        <title>{pageProps.notification.stores.name} - Avaliação de produtos</title>
+        <title>{pageProps?.notification?.stores?.name} - Avaliação de produtos</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
 
