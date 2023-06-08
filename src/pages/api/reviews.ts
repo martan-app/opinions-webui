@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import supabase from "./../../utils/supabase-client"
+import supabase from "../../utils/supabase-client"
+import sinitizer from "string-sanitizer"
 
 type Data = any
 
@@ -16,10 +17,10 @@ export default async function handler(
         store_id: storeId,
         rating: body.rating,
         status: "under_analysis",
-        author: body.customer.name,
+        author: sinitizer.sanitize.keepUnicode(body.author),
         customer: body.customer.id,
-        title: body.title,
-        body: body.body,
+        title: sinitizer.sanitize.keepUnicode(body.title),
+        body: sinitizer.sanitize.keepUnicode(body.body),
         is_recommended: body.is_recommended,
         product_id: body.product,
         notification_id: body.notification_id,
