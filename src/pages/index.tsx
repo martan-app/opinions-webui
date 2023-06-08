@@ -1,107 +1,15 @@
-import { Box, Button, Flex, Text, MantineProvider } from "@mantine/core"
-import { verify } from "jsonwebtoken"
-import { useEffect, useRef, useState } from "react"
-import supabase from "../utils/supabase-client"
+import { Box, Button, Flex, Text } from "@mantine/core"
+import { useContext, useEffect, useRef, useState } from "react"
 import { Logo } from "../components/Logo"
+import Products from "../components/Products"
 import NotificationsComponent, {
   NotificationsHandle,
 } from "../components/notifications"
-import Products from "../components/Products"
-
-export async function getServerSideProps(context: any) {
-  const { query } = context
-  const token = process.env.NOTIFICATION_TOKEN || ""
-  let decodedToken: any = null
-
-  if (!query.t || !query.notification) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/not-found",
-      },
-    }
-  }
-
-  try {
-    decodedToken = verify(query.t || "", token)
-  } catch (error) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/not-valid?reason=expired",
-      },
-    }
-  }
-
-  const { data, error: notErr } = await supabase
-    .from("notifications")
-    .select(
-      `
-      id,
-      orders(id, order_id, products),
-      customers(name, id),
-      stores(name, url, logo_url),
-      order_id,
-      store_id,
-      status,
-      token,
-      reviews
-    `
-    )
-    .eq("id", query.notification)
-
-  if (notErr || !data.length) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/not-found",
-      },
-    }
-  }
-
-  if (decodedToken.store_id !== data[0].store_id || query.t !== data[0].token) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/not-valid?reason=storeId,token",
-      },
-    }
-  }
-
-  const notificationBody: any = data[0]
-
-  if (notificationBody) {
-    const { data: products, error: prodErr } = await supabase
-      .from("products")
-      .select("id, name, sku, url, pictures, product_id")
-      .in("id", notificationBody.orders.products)
-
-    if (products) {
-      notificationBody.productBody = products
-    }
-
-    // reviews
-    if (notificationBody.reviews && notificationBody.reviews.length) {
-      const { data: reviews, error: revErr } = await supabase
-        .from("reviews")
-        .select("id, product_id, status, rating")
-        .in("id", notificationBody.reviews)
-
-      if (reviews && reviews.length > 0) {
-        notificationBody.reviews = reviews
-      }
-    }
-  }
-
-  return {
-    props: {
-      notification: notificationBody,
-      decodedToken,
-    },
-  }
-}
+import { AuthorContext } from "./../context/notification"
+import { getServerSideProps } from "./server-side-props"
 
 export default function Home(props: any) {
+  const { __author } = useContext<any>(AuthorContext)
   const { notification, decodedToken } = props
   const $alert = useRef<NotificationsHandle>(null)
   const [show, __show] = useState(false)
@@ -123,6 +31,10 @@ export default function Home(props: any) {
       __show(true)
     }, 100)
   }, [])
+
+  useEffect(() => {
+    __author(notification?.customers?.name)
+  }, [__author, notification?.customers?.name])
 
   if (!notification || !decodedToken || !show) {
     return null
@@ -148,7 +60,7 @@ export default function Home(props: any) {
         direction="column"
         wrap="wrap"
       >
-        {notification.stores && notification.stores.logo_url && (
+        {notification?.stores?.logo_url && (
           <Logo src={notification.stores.logo_url} />
         )}
 
@@ -170,10 +82,9 @@ export default function Home(props: any) {
 
         {renderButton()}
 
-        <Text span>
-          © {new Date().getFullYear()}{" "}
-          {notification.stores && notification.stores.name}. Todos os direitos
-          reservados.
+        <Text span p="xl" align="center">
+          © {new Date().getFullYear()} {notification?.stores?.name}. Todos os
+          direitos reservados.
         </Text>
       </Flex>
 
@@ -181,3 +92,5 @@ export default function Home(props: any) {
     </Box>
   )
 }
+
+export { getServerSideProps }
