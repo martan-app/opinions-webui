@@ -132,10 +132,10 @@ export default function ProductsWrapper({
             product={product}
             order={notification.order_id}
             token=""
-            onSave={({ id }) => {
+            onSave={({ id }: any): void => {
               onCreateReview(id)
             }}
-            onError={(err) => {
+            onError={() => {
               alertComponent?.error("Não foi possível enviar o review")
             }}
           />

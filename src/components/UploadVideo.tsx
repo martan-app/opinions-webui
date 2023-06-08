@@ -35,7 +35,7 @@ export function UploadVideo(props: Partial<Props>) {
           transformation: [
             {
               format: "auto",
-              quality: 80,
+              quality: '80',
               cropMode: "pad_resize",
               height: "500",
               width: "500",

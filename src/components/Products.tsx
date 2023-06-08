@@ -5,7 +5,7 @@ import { NotificationsHandle } from "./notifications"
 interface ProductsProps {
   products: any[]
   notification: any
-  alertComponent?: NotificationsHandle
+  alertComponent?: NotificationsHandle | null
 }
 
 export default function Products({
