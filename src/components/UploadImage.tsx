@@ -9,41 +9,39 @@ import {
   Group,
   Image,
   Menu,
-  SimpleGrid,
   Text,
-} from "@mantine/core";
+} from "@mantine/core"
 import {
   Dropzone,
   DropzoneProps,
   FileWithPath,
   IMAGE_MIME_TYPE,
-} from "@mantine/dropzone";
-import { useState } from "react";
-import uuid from "uuid-random";
-import supabase from "../utils/supabase-client";
+} from "@mantine/dropzone"
+import { useState } from "react"
+import UploadImageWithImgKit from "./../lib/imageUploader"
 
 interface Props extends DropzoneProps {
-  onUpload: (files: any) => void;
-  onError: (error: any) => void;
-  onSkip: () => void;
+  onUpload: (files: any) => void
+  onError: (error: any) => void
+  onSkip: () => void
 }
 
 export function UploadImage(props: Partial<Props>) {
-  const { onUpload, onSkip, onError } = props;
+  const { onUpload, onSkip, onError } = props
 
-  const [isLoading, __isLoading] = useState(false);
-  const [files, __files] = useState<FileWithPath[]>([]);
+  const [isLoading, __isLoading] = useState(false)
+  const [files, __files] = useState<FileWithPath[]>([])
 
-  const previews = files.map((file, index) => {
-    if (!file) return null;
-    const imageUrl = window.URL.createObjectURL(file);
+  const previews = files.map((file) => {
+    if (!file) return null
+    const imageUrl = window.URL.createObjectURL(file)
     return (
-      <Grid.Col key={index} span={3}>
+      <Grid.Col key={file.name} span={3}>
         <Card
           withBorder
           shadow="sm"
           radius="md"
-          key={index}
+          key={file.name}
           sx={{
             maxWidth: "150px",
             height: "150px",
@@ -111,73 +109,46 @@ export function UploadImage(props: Partial<Props>) {
           </Card.Section>
 
           <Card.Section mt="sm">
-            <Image
-              key={index}
-              src={imageUrl}
-              imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
-            />
+            <div className="preview-pictures">
+              <Image
+                alt={file.name}
+                key={file.name}
+                src={imageUrl}
+                imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
+              />
+            </div>
           </Card.Section>
         </Card>
       </Grid.Col>
-    );
-  });
+    )
+  })
 
-  async function upload() {
+  async function upload(): Promise<void> {
     if (files.length > 0) {
-      __isLoading(true);
-      try {
-        const urls = [];
-        for (const file of files) {
-          const ext = file.name.substr(file.name.lastIndexOf(".") + 1);
-          const id = uuid();
-          const newName = `${id}.${ext}`;
-          const { data, error } = await supabase.storage
-            .from("testeupload")
-            .upload(`photos/${newName}`, file, {
-              upsert: true,
-              contentType: file.type,
-            });
+      __isLoading(true)
+      const listOfPictures: any = []
+      const promises = files.map((file) =>
+        UploadImageWithImgKit(file)
+          .then((img) => listOfPictures.push(img))
+          .catch((err) => {
+            console.error(err)
+          })
+      )
 
-          if (data?.path) {
-            const { data: publicURL } = supabase.storage
-              .from("testeupload")
-              .getPublicUrl(`photos/${newName}`);
-            urls.push({
-              _id: id,
-              url: publicURL.publicUrl,
-              size: "original",
-            });
+      return Promise.all(promises)
+        .then(() => {
+          if (listOfPictures?.length && typeof onUpload === "function") {
+            onUpload(listOfPictures)
           }
-
-          if (error && typeof onError === "function") {
-            onError(error);
-          }
-        }
-
-        if (urls.length && typeof onUpload === "function") {
-          onUpload(urls);
-        }
-      } catch (error) {}
-      __isLoading(false);
+        })
+        .finally(() => {
+          __isLoading(false)
+        })
     }
   }
 
   function setFilesToUpload(data: []) {
-    __files(data);
-    // __files(old => {
-    //   const oldFiles = Array.from(old)
-    //   if (oldFiles.length < 4) {
-    //     let i = 0
-    //     while (oldFiles.length < 4) {
-    //       oldFiles.push(data[i]);
-    //       i++
-    //     }
-
-    //     return oldFiles
-    //   }
-
-    //   return oldFiles
-    // })
+    __files(data)
   }
 
   return (
@@ -188,11 +159,11 @@ export function UploadImage(props: Partial<Props>) {
         onDrop={setFilesToUpload}
         onReject={(files) => {
           if (typeof onError === "function") {
-            onError("Máximo de arquivos permitido: 4");
+            onError("Máximo de arquivos permitido: 5")
           }
         }}
         maxSize={3 * 1024 ** 2}
-        maxFiles={4}
+        maxFiles={5}
         accept={IMAGE_MIME_TYPE}
         {...props}
       >
@@ -228,17 +199,22 @@ export function UploadImage(props: Partial<Props>) {
           variant="outline"
           onClick={() => {
             if (onSkip) {
-              onSkip();
+              onSkip()
             }
           }}
         >
           Pular etapa
         </Button>
 
-        <Button disabled={isLoading} onClick={upload}>
+        <Button
+          disabled={isLoading}
+          onClick={() => {
+            upload().catch(console.error)
+          }}
+        >
           {isLoading ? "Enviando.." : "Enviar"}
         </Button>
       </Flex>
     </Box>
-  );
+  )
 }
