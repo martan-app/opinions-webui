@@ -1,7 +1,9 @@
-import { Image } from "@mantine/core";
+import { Image } from "@mantine/core"
 
 type Props = {
-  src: string;
-};
+  src: string
+}
 
-export const Logo = ({ src }: Props) => <Image src={src} fit="cover" width="120px" alt="Logo"/>;
+export const Logo = ({ src }: Props) => (
+  <Image src={src} fit="cover" width="120px" alt="Logo" />
+)

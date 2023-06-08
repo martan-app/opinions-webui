@@ -5,20 +5,23 @@ import {
   Group,
   Textarea,
   TextInput,
-} from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { useState } from "react";
+} from "@mantine/core"
+import { useForm } from "@mantine/form"
+import { useContext, useEffect, useState } from "react"
+import { sanitize } from "string-sanitizer"
+import { AuthorContext } from "./../context/notification"
+import Author from "./Author"
 
 interface ProductsProps {
-  getRating: () => number;
-  storeId: number;
-  notificationId: string;
-  order: any;
-  product: any;
-  token: string;
-  onSave: (reviewId: any) => void;
-  onError: (error: any) => void;
-  customer: any;
+  getRating: () => number
+  storeId: number
+  notificationId: string
+  order: any
+  product: any
+  token: string
+  onSave: (reviewId: any) => void
+  onError: (error: any) => void
+  customer: any
 }
 
 export default function Form({
@@ -33,24 +36,36 @@ export default function Form({
   notificationId,
 }: ProductsProps) {
   const [isLoading, __isLoading] = useState(false)
+  const { author } = useContext<any>(AuthorContext)
+
   const form = useForm({
     initialValues: {
+      author: author,
       title: "",
       body: "",
       is_recommended: true,
     },
 
     validate: {
+      title: (value) => (!value.length ? "Campo obrigatório" : null),
       body: (value) =>
         value.length < 10
           ? "A avaliação precisa ter no mínimo 10 caracteres"
           : null,
     },
-  });
+  })
 
   async function createReview(values: any) {
     __isLoading(true)
-    const url = "/api/reviews";
+
+    const fieldsToSanitize = ["author", "title", "body"]
+    fieldsToSanitize.forEach((field) => {
+      if (values[field]) {
+        values[field] = sanitize.keepUnicode(values[field])
+      }
+    })
+
+    const url = "/api/reviews"
     const req = await fetch(url, {
       method: "POST",
 
@@ -66,15 +81,15 @@ export default function Form({
         product: product.product_id,
         rating: getRating(),
         customer,
-        notification_id: notificationId
+        notification_id: notificationId,
       }),
-    });
+    })
 
-    const res = await req.json();
+    const res = await req.json()
     if (req.ok && typeof onSave === "function") {
-      onSave(res);
+      onSave(res)
     } else if (!req.ok && req.status >= 400) {
-      onError(res);
+      onError(res)
     }
 
     __isLoading(false)
@@ -83,8 +98,17 @@ export default function Form({
   return (
     <form onSubmit={form.onSubmit((values) => createReview(values))}>
       <Box>
+        <Author
+          onChange={(author) => {
+            if (author) {
+              form.setFieldValue("author", author)
+            }
+          }}
+        />
+
         <TextInput
-          placeholder="Exemplo: Facil manuseio"
+          withAsterisk
+          placeholder="Exemplo: Fácil manuseio"
           label="Título"
           description="Escreva um título para a sua avaliação"
           size="md"
@@ -98,6 +122,9 @@ export default function Form({
           description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
           error="Verifique o campo"
           size="md"
+          autosize
+          maxRows={10}
+          minRows={4}
           withAsterisk
           {...form.getInputProps("body")}
         />
@@ -110,10 +137,10 @@ export default function Form({
       </Box>
 
       <Group position="right" mt="md" mb="mb">
-        <Button type="submit" disabled={isLoading}>{
-          isLoading ? "Enviando.." : "Enviar"
-        }</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Enviando.." : "Enviar"}
+        </Button>
       </Group>
     </form>
-  );
+  )
 }

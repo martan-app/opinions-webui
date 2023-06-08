@@ -1,16 +1,17 @@
-import { Accordion, Alert, Button, Flex } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
-import Form from "./Form";
-import { NotificationsHandle } from "./notifications";
-import Product, { ProductHandle } from "./Product";
-import AppStepper, { StepperHandle } from "./Stepper";
-import { UploadImage } from "./UploadImage";
-import { UploadVideo } from "./UploadVideo";
+/* eslint-disable react/display-name */
+import { Accordion, Alert } from "@mantine/core"
+import { memo, useEffect, useRef, useState } from "react"
+import Form from "./Form"
+import Product, { ProductHandle } from "./Product"
+import AppStepper, { StepperHandle } from "./Stepper"
+import { UploadImage } from "./UploadImage"
+import { UploadVideo } from "./UploadVideo"
+import { NotificationsHandle } from "./notifications"
 
 interface ProductsProps {
-  product: any;
-  notification: any;
-  alertComponent?: any | NotificationsHandle;
+  product: any
+  notification: any
+  alertComponent?: any | NotificationsHandle
 }
 
 export default function ProductsWrapper({
@@ -18,18 +19,19 @@ export default function ProductsWrapper({
   notification,
   alertComponent,
 }: ProductsProps) {
-  const [isLoading, __isLoading] = useState(false);
-  const [reviewId, __reviewId] = useState<string | null>(null);
-  const [step, __step] = useState<string>("review");
+  const [isLoading, __isLoading] = useState(false)
+  const [reviewId, __reviewId] = useState<string | null>(null)
+  const [step, __step] = useState<string>("review")
 
-  const [hasPictures, __hasPictures] = useState(false);
+  const [hasPictures, __hasPictures] = useState(false)
+  const [hasVideo, __hasVideo] = useState(false)
 
-  const $steper = useRef<StepperHandle>(null);
-  const $rating = useRef<ProductHandle>(null);
+  const $steper = useRef<StepperHandle>(null)
+  const $rating = useRef<ProductHandle>(null)
 
   async function updateReviewPictures(pictures: any[]): Promise<void> {
-    __isLoading(true);
-    const url = `/api/reviews/${reviewId}/pictures`;
+    __isLoading(true)
+    const url = `/api/reviews/${reviewId}/pictures`
     const req = await fetch(url, {
       method: "PATCH",
 
@@ -40,19 +42,19 @@ export default function ProductsWrapper({
       },
 
       body: JSON.stringify(pictures),
-    });
+    })
 
     if (req.ok && req.status === 204) {
-      __step("video");
-      __hasPictures(true);
-      $steper.current?.nextStep();
+      __step("video")
+      __hasPictures(true)
+      $steper.current?.nextStep()
     }
-    __isLoading(false);
+    __isLoading(false)
   }
 
   async function updateReviewVideo(videoUrl: string): Promise<void> {
-    __isLoading(true);
-    const url = `/api/reviews/${reviewId}/video`;
+    __isLoading(true)
+    const url = `/api/reviews/${reviewId}/video`
     const req = await fetch(url, {
       method: "PATCH",
 
@@ -63,46 +65,54 @@ export default function ProductsWrapper({
       },
 
       body: JSON.stringify(videoUrl),
-    });
+    })
 
     if (req.ok && req.status === 204) {
-      __step("success");
-      __hasPictures(true);
-      $steper.current?.nextStep();
+      __step("success")
+      __hasPictures(true)
+      $steper.current?.nextStep()
     }
-    __isLoading(false);
+    __isLoading(false)
   }
 
   useEffect(() => {
-    if (notification.reviews && notification.reviews.length) {
+    if (notification?.reviews?.length) {
       const hasReview = notification.reviews.find(
-        (r: any) => r.product_id === product.id
-      );
-      if (hasReview) {
-        $steper.current?.setStep(3);
-        $rating.current?.setReadOnly();
-        $rating.current?.setRating(hasReview.rating);
-        __step("success");
+        (r: any) => r.product_id === product.product_id
+      )
+
+      if (!hasReview) {
+        $steper.current?.setStep(3)
+        $rating.current?.setReadOnly()
+        $rating.current?.setRating(hasReview.rating)
+        __step("success")
       }
     }
-  }, [notification.reviews, product.id]);
+  }, [notification, product])
 
   function getPictureUrl() {
     let url = "https://img.icons8.com/ios/100/null/no-image.png"
-    if (product.pictures && product.pictures.length) {
+    if (product?.pictures?.length) {
       url = product.pictures[0]
     }
     return url
   }
 
+  function onCreateReview(id: string) {
+    __reviewId(id)
+    __step("pictures")
+    $steper.current?.nextStep()
+    $rating.current?.setReadOnly()
+  }
+
+  const FormMemo = memo(function (props: any) {
+    return <Form {...props} />
+  })
+
   return (
     <Accordion.Item value={product.id} key={product.label}>
       <Accordion.Control>
-        <Product
-          name={product.name}
-          image={getPictureUrl()}
-          ref={$rating}
-        />
+        <Product name={product.name} image={getPictureUrl()} ref={$rating} />
       </Accordion.Control>
 
       <Accordion.Panel>
@@ -114,7 +124,7 @@ export default function ProductsWrapper({
             display: step === "review" ? "block" : "none",
           }}
         >
-          <Form
+          <FormMemo
             notificationId={notification.id}
             customer={notification.customers}
             getRating={() => $rating.current?.getRating()}
@@ -123,13 +133,10 @@ export default function ProductsWrapper({
             order={notification.order_id}
             token=""
             onSave={({ id }) => {
-              $steper.current?.nextStep();
-              $rating.current?.setReadOnly();
-              __reviewId(id);
-              __step("pictures");
+              onCreateReview(id)
             }}
             onError={(err) => {
-              alertComponent?.error("Não foi possível enviar o review");
+              alertComponent?.error("Não foi possível enviar o review")
             }}
           />
         </div>
@@ -141,13 +148,15 @@ export default function ProductsWrapper({
           }}
         >
           <UploadImage
-            onUpload={(file) => updateReviewPictures(file)}
+            onUpload={(file) => {
+              updateReviewPictures(file)
+            }}
             onSkip={() => {
-              $steper.current?.nextStep();
-              __step("video");
+              $steper.current?.nextStep()
+              __step("video")
             }}
             onError={(err) => {
-              alertComponent?.error(err || "Não foi possivel enviar imagens");
+              alertComponent?.error(err || "Não foi possivel enviar imagens")
             }}
           />
         </div>
@@ -159,14 +168,16 @@ export default function ProductsWrapper({
           }}
         >
           <UploadVideo
-            hasPictures={hasPictures}
-            onUpload={(file) => updateReviewVideo(file)}
+            hasVideo={hasVideo}
+            onUpload={(file) => {
+              updateReviewVideo(file)
+            }}
             onSkip={(to) => {
-              to ? $steper.current?.backStep() : $steper.current?.nextStep();
-              __step(to || "success");
+              to ? $steper.current?.backStep() : $steper.current?.nextStep()
+              __step(to ?? "success")
             }}
             onError={(err) => {
-              alertComponent?.error("Não foi possivel enviar seu vídeo");
+              alertComponent?.error("Não foi possivel enviar seu vídeo")
             }}
           />
         </div>
@@ -177,12 +188,12 @@ export default function ProductsWrapper({
             display: step === "success" ? "block" : "none",
           }}
         >
-          <Alert title="Enviado!" color="primary" variant="light">
+          <Alert title="Enviado!" color="green" variant="light">
             Sua avaliação foi enviada com sucesso! Te informaremos assim que for
             publicada.
           </Alert>
         </div>
       </Accordion.Panel>
     </Accordion.Item>
-  );
+  )
 }

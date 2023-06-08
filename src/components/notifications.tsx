@@ -3,51 +3,47 @@ import {
   ForwardRefRenderFunction,
   useImperativeHandle,
   useState,
-} from "react";
+} from "react"
 
 import {
   Dialog,
-  Group,
-  Button,
-  TextInput,
-  Text,
-  Notification,
-} from "@mantine/core";
-import { CircleCheck, CircleX } from "tabler-icons-react";
+  Notification
+} from "@mantine/core"
+import { CircleCheck, CircleX } from "tabler-icons-react"
 
 interface Props {}
 
 export type NotificationsHandle = {
-  success: (msg: string) => void;
-  error: (msg: string) => void;
-};
+  success: (msg: string) => void
+  error: (msg: string) => void
+}
 
 const Notifications: ForwardRefRenderFunction<NotificationsHandle, Props> = (
   props,
   ref
 ) => {
-  const [opened, __opened] = useState(false);
-  const [message, __message] = useState("");
-  const [type, __type] = useState<string | null>(null);
+  const [opened, __opened] = useState(false)
+  const [message, __message] = useState("")
+  const [type, __type] = useState<string | null>(null)
 
   useImperativeHandle(ref, () => ({
     success: (msg: string) => {
-      __message(msg);
-      __type("success");
-      __opened(true);
+      __message(msg)
+      __type("success")
+      __opened(true)
     },
 
     error: (msg: string) => {
-      __message(msg);
-      __type("error");
-      __opened(true);
+      __message(msg)
+      __type("error")
+      __opened(true)
     },
-  }));
+  }))
 
   function close() {
-    __message("");
-    __type(null);
-    __opened(false);
+    __message("")
+    __type(null)
+    __opened(false)
   }
 
   return (
@@ -69,7 +65,7 @@ const Notifications: ForwardRefRenderFunction<NotificationsHandle, Props> = (
         {message}
       </Notification>
     </Dialog>
-  );
-};
+  )
+}
 
-export default forwardRef(Notifications);
+export default forwardRef(Notifications)

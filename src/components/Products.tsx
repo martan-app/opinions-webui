@@ -1,11 +1,11 @@
-import { Accordion } from "@mantine/core";
-import { NotificationsHandle } from "./notifications";
-import ProductsWrapper from "./ProductWrapper";
+import { Accordion } from "@mantine/core"
+import ProductsWrapper from "./ProductWrapper"
+import { NotificationsHandle } from "./notifications"
 
 interface ProductsProps {
-  products: any[];
-  notification: any;
-  alertComponent?: any | NotificationsHandle;
+  products: any[]
+  notification: any
+  alertComponent?: NotificationsHandle
 }
 
 export default function Products({
@@ -13,18 +13,18 @@ export default function Products({
   notification,
   alertComponent,
 }: ProductsProps) {
-  const list = products.map((item, index) => (
+  const list = products.map((item) => (
     <ProductsWrapper
-      key={index}
+      key={item.id}
       product={item}
       notification={notification}
       alertComponent={alertComponent}
     />
-  ));
+  ))
 
   return (
-    <Accordion chevronPosition="right" variant="separated">
+    <Accordion p="sm" chevronPosition="right" variant="separated">
       {list}
     </Accordion>
-  );
+  )
 }

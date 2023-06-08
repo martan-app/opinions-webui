@@ -1,40 +1,38 @@
-import { Avatar, Group, Image, Rating, Text } from "@mantine/core";
+import { Box, Group, Image, Rating, Text } from "@mantine/core"
 import {
-  forwardRef,
   ForwardRefRenderFunction,
+  forwardRef,
   useImperativeHandle,
   useState,
-} from "react";
+} from "react"
 
 interface ProductProps {
-  name: string;
-  image?: string;
+  name: string
+  image?: string
 }
 
 export type ProductHandle = {
-  getRating: () => any;
-  setReadOnly: () => void;
-  setRating: (rating: number) => void;
-};
+  getRating: () => any
+  setReadOnly: () => void
+  setRating: (rating: number) => void
+}
 
 const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
   { name, image },
   ref
 ) => {
-  const [rating, __rating] = useState(5);
-  const [isReadOnly, __isReadOnly] = useState(false);
+  const [rating, __rating] = useState(5)
+  const [isReadOnly, __isReadOnly] = useState(false)
 
   useImperativeHandle(ref, () => ({
     getRating: () => rating,
     setReadOnly: () => __isReadOnly(true),
     setRating: (rating) => __rating(rating),
-  }));
+  }))
 
   return (
     <Group noWrap>
       <Image
-        width={200}
-        height={150}
         src={image}
         alt="With default placeholder"
         withPlaceholder
@@ -48,11 +46,27 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
             filter: "blur(0)",
             transform: "scale(1)",
           },
+          maxWidth: "200px",
+          width: "100%",
+
+          // Static media query
+          "@media (max-width: 580px)": {
+            maxWidth: "100px",
+          },
         }}
       />
 
-      <div>
-        <Text>{name}</Text>
+      <Box p="md">
+        <Text
+          sx={{
+            // Static media query
+            "@media (max-width: 580px)": {
+              fontSize: "14px",
+            },
+          }}
+        >
+          {name}
+        </Text>
         <Text size="sm" color="dimmed" weight={400}>
           <Rating
             defaultValue={rating}
@@ -63,9 +77,9 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
             mt="md"
           />
         </Text>
-      </div>
+      </Box>
     </Group>
-  );
-};
+  )
+}
 
-export default forwardRef(Product);
+export default forwardRef(Product)
