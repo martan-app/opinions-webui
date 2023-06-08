@@ -6,7 +6,7 @@ import NotificationsComponent, {
   NotificationsHandle,
 } from "../components/notifications"
 import { AuthorContext } from "./../context/notification"
-import { getServerSideProps } from "./server-side-props"
+import { getServerSideProps } from "../server-side-props/reviews"
 
 export default function Home(props: any) {
   const { __author } = useContext<any>(AuthorContext)
@@ -72,7 +72,7 @@ export default function Home(props: any) {
         <Products
           products={notification.productBody}
           notification={notification}
-          alertComponent={$alert.current}
+          alertComponent={$alert?.current}
         />
 
         <Text span p="xl" align="center">
