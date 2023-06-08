@@ -1,44 +1,59 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Box, Button, FileInput, Flex } from "@mantine/core";
+import { Button, FileInput, Flex } from "@mantine/core"
 
-import { useState } from "react";
-import uuid from "uuid-random";
-import supabase from "../utils/supabase-client";
+import { useState } from "react"
+import imagekit from "./../utils/imagekit-client"
 
 interface Props {
-  hasPictures: boolean;
-  onUpload: (files: any) => void;
-  onError: (error: any) => void;
-  onSkip: (to?: string) => void;
+  hasVideo: boolean
+  onUpload: (files: any) => void
+  onError: (error: any) => void
+  onSkip: (to?: string) => void
 }
 
 export function UploadVideo(props: Partial<Props>) {
-  const [isLoading, __isLoading] = useState(false);
-  const { onUpload, onSkip, onError, hasPictures } = props;
+  const [isLoading, __isLoading] = useState(false)
+  const { onUpload, onSkip, onError, hasVideo } = props
 
-  const [file, __file] = useState<File | null>(null);
+  const [file, __file] = useState<File | null>(null)
 
   async function upload() {
     if (file) {
-      __isLoading(true);
+      __isLoading(true)
       try {
-        const { data, error } = await supabase.storage
-          .from("testeupload")
-          .upload(`videos/${file.name}`, file, {
-            upsert: true,
-            contentType: file.type,
-          });
+        const video = await imagekit.upload({
+          file,
+          fileName: file.name,
+          useUniqueFileName: true,
+          folder: "videos/reviews/",
+          tags: ["reviews"],
+        })
 
-        if (data?.path) {
-          const { data: publicURL } = supabase.storage
-            .from("testeupload")
-            .getPublicUrl(`photos/${file.name}`);
-          if (onUpload && publicURL && publicURL.publicUrl) {
-            onUpload(publicURL.publicUrl);
-          }
+        const url = imagekit.url({
+          path: video.filePath,
+          urlEndpoint: process.env.NEXT_PUBLIC_IMGKIT_ENDPOINT,
+          transformation: [
+            {
+              format: "auto",
+              quality: 80,
+              cropMode: "pad_resize",
+              height: "500",
+              width: "500",
+              aspectRatio: "4:3",
+            },
+          ],
+        })
+
+        if (typeof onUpload === "function" && url) {
+          onUpload(url)
         }
-      } catch (error) {}
-      __isLoading(false);
+      } catch (error) {
+        if (typeof onError === "function") {
+          onError(error)
+        }
+      } finally {
+        __isLoading(false)
+      }
     }
   }
 
@@ -53,7 +68,7 @@ export function UploadVideo(props: Partial<Props>) {
           sx={{
             width: "100%",
           }}
-          accept="video/mp4"
+          accept=".webm,.mp4,.mov"
           value={file}
           onChange={__file}
           placeholder="Escolhe um video"
@@ -64,19 +79,19 @@ export function UploadVideo(props: Partial<Props>) {
 
       <Flex
         gap="md"
-        justify={!hasPictures ? "space-between" : "flex-end"}
+        justify={!hasVideo ? "space-between" : "flex-end"}
         align="center"
         direction="row"
         wrap="wrap-reverse"
         mt="md"
       >
-        {!hasPictures && (
+        {!hasVideo && (
           <Button
             disabled={isLoading}
             variant="light"
             onClick={() => {
               if (onSkip) {
-                onSkip("pictures");
+                onSkip("pictures")
               }
             }}
           >
@@ -86,22 +101,24 @@ export function UploadVideo(props: Partial<Props>) {
 
         <Flex gap={10}>
           <Button
-          disabled={isLoading}
-          variant="outline"
-          onClick={() => {
-            if (onSkip) {
-              onSkip();
-            }
-          }}
-        >
-          Pular etapa
-        </Button>
+            disabled={isLoading}
+            variant="outline"
+            onClick={() => {
+              if (onSkip) {
+                onSkip()
+              }
+            }}
+          >
+            Pular etapa
+          </Button>
 
-        <Button disabled={isLoading} onClick={upload}>
-          {isLoading ? "Enviando.." : "Enviar"}
-        </Button>
+          <Button disabled={isLoading} onClick={() => {
+            upload().catch(console.error)
+          }}>
+            {isLoading ? "Enviando.." : "Enviar"}
+          </Button>
         </Flex>
       </Flex>
     </Flex>
-  );
+  )
 }
