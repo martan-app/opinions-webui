@@ -39,7 +39,7 @@ export function UploadVideo(props: Partial<Props>) {
               cropMode: "pad_resize",
               height: "500",
               width: "500",
-              aspectRatio: "4:3",
+              aspectRatio: "4-3",
             },
           ],
         })
@@ -48,6 +48,7 @@ export function UploadVideo(props: Partial<Props>) {
           onUpload(url)
         }
       } catch (error) {
+        console.log(error)
         if (typeof onError === "function") {
           onError(error)
         }
