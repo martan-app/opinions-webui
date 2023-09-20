@@ -12,12 +12,14 @@ interface ProductsProps {
   product: any
   notification: any
   alertComponent?: any | NotificationsHandle
+  openAcordion: any
 }
 
 export default function ProductsWrapper({
   product,
   notification,
   alertComponent,
+  openAcordion,
 }: ProductsProps) {
   const [isLoading, __isLoading] = useState(false)
   const [reviewId, __reviewId] = useState<string | null>(null)
@@ -81,7 +83,7 @@ export default function ProductsWrapper({
         (r: any) => r.product_id === product.product_id
       )
 
-      if (!hasReview) {
+      if (hasReview) {
         $steper.current?.setStep(3)
         $rating.current?.setReadOnly()
         $rating.current?.setRating(hasReview.rating)
@@ -112,7 +114,14 @@ export default function ProductsWrapper({
   return (
     <Accordion.Item value={product.id} key={product.label}>
       <Accordion.Control>
-        <Product name={product.name} image={getPictureUrl()} ref={$rating} />
+        <Product
+          openAcordion={() => {
+            openAcordion(product.id)
+          }}
+          name={product.name}
+          image={getPictureUrl()}
+          ref={$rating}
+        />
       </Accordion.Control>
 
       <Accordion.Panel>

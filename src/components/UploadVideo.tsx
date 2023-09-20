@@ -48,7 +48,6 @@ export function UploadVideo(props: Partial<Props>) {
           onUpload(url)
         }
       } catch (error) {
-        console.log(error)
         if (typeof onError === "function") {
           onError(error)
         }

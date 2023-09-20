@@ -9,6 +9,7 @@ import {
 interface ProductProps {
   name: string
   image?: string
+  openAcordion?: any
 }
 
 export type ProductHandle = {
@@ -18,7 +19,7 @@ export type ProductHandle = {
 }
 
 const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
-  { name, image },
+  { name, image, openAcordion },
   ref
 ) => {
   const [rating, __rating] = useState(5)
@@ -69,8 +70,11 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         </Text>
         <Text size="sm" color="dimmed" weight={400}>
           <Rating
+            onChange={(r) => {
+              __rating(r)
+              typeof openAcordion === "function" && openAcordion()
+            }}
             defaultValue={rating}
-            onChange={__rating}
             name={name}
             readOnly={isReadOnly}
             size="lg"
