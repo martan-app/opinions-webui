@@ -25,6 +25,7 @@ export default async function handler(
         product_id: body.product,
         product_sku: body.sku,
         notification_id: body.notification_id,
+        verified_purchase: true
       },
     ]
 
