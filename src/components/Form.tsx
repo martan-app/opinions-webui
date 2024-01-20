@@ -79,6 +79,7 @@ export default function Form({
         ...values,
         order,
         product: product.product_id,
+        sku: product.sku,
         rating: getRating(),
         customer,
         notification_id: notificationId,

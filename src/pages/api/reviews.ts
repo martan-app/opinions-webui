@@ -23,6 +23,7 @@ export default async function handler(
         body: sinitizer.sanitize.keepUnicode(body.body),
         is_recommended: body.is_recommended,
         product_id: body.product,
+        product_sku: body.sku,
         notification_id: body.notification_id,
       },
     ]
