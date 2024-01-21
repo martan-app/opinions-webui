@@ -21,7 +21,7 @@ export default function App(props: AppProps) {
       e.preventDefault();
     });
   }, []);
-  
+
   return (
     <>
       <Head>
