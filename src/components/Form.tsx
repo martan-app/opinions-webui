@@ -5,26 +5,28 @@ import {
   Group,
   Textarea,
   TextInput,
-} from "@mantine/core"
-import { useForm } from "@mantine/form"
-import { useContext, useEffect, useState } from "react"
-import { sanitize } from "string-sanitizer"
-import { AuthorContext } from "./../context/notification"
-import Author from "./Author"
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { sanitize } from "string-sanitizer";
+import { AuthorContext } from "./../context/notification";
+import Author from "./Author";
 
 interface ProductsProps {
-  getRating: () => number
-  storeId: number
-  notificationId: string
-  order: any
-  product: any
-  token: string
-  onSave: (reviewId: any) => void
-  onError: (error: any) => void
-  customer: any
+  getRating: () => number;
+  storeId: number;
+  notificationId: string;
+  order: any;
+  product: any;
+  token: string;
+  onSave: (reviewId: any) => void;
+  onError: (error: any) => void;
+  customer: any;
+  step: string;
 }
 
 export default function Form({
+  step,
   order,
   product,
   token,
@@ -35,8 +37,9 @@ export default function Form({
   customer,
   notificationId,
 }: ProductsProps) {
-  const [isLoading, __isLoading] = useState(false)
-  const { author } = useContext<any>(AuthorContext)
+  console.log({ step });
+  const [isLoading, __isLoading] = useState(false);
+  const { author } = useContext<any>(AuthorContext);
 
   const form = useForm({
     initialValues: {
@@ -53,19 +56,19 @@ export default function Form({
           ? "A avaliação precisa ter no mínimo 10 caracteres"
           : null,
     },
-  })
+  });
 
   async function createReview(values: any) {
-    __isLoading(true)
+    __isLoading(true);
 
-    const fieldsToSanitize = ["author", "title", "body"]
+    const fieldsToSanitize = ["author", "title", "body"];
     fieldsToSanitize.forEach((field) => {
       if (values[field]) {
-        values[field] = sanitize.keepUnicode(values[field])
+        values[field] = sanitize.keepUnicode(values[field]);
       }
-    })
+    });
 
-    const url = "/api/reviews"
+    const url = "/api/reviews";
     const req = await fetch(url, {
       method: "POST",
 
@@ -84,17 +87,37 @@ export default function Form({
         customer,
         notification_id: notificationId,
       }),
-    })
+    });
 
-    const res = await req.json()
+    const res = await req.json();
     if (req.ok && typeof onSave === "function") {
-      onSave(res)
+      onSave(res);
     } else if (!req.ok && req.status >= 400) {
-      onError(res)
+      onError(res);
     }
 
-    __isLoading(false)
+    __isLoading(false);
   }
+
+  const buttonLabel = useCallback(
+    function () {
+      console.log({isLoading, step})
+      if (isLoading) {
+        return "Enviando..";
+      }
+
+      if (step === "picture") {
+        return "Enviar fotos";
+      }
+
+      if (step === "video") {
+        return "Enviar vídeo";
+      }
+
+      return "Enviar";
+    },
+    [isLoading, step]
+  );
 
   return (
     <form onSubmit={form.onSubmit((values) => createReview(values))}>
@@ -102,7 +125,7 @@ export default function Form({
         <Author
           onChange={(author) => {
             if (author) {
-              form.setFieldValue("author", author)
+              form.setFieldValue("author", author);
             }
           }}
         />
@@ -139,9 +162,10 @@ export default function Form({
 
       <Group position="right" mt="md" mb="mb">
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Enviando.." : "Enviar"}
+          {/* {isLoading ? "Enviando.." : "Enviar"} */}
+          {buttonLabel()}
         </Button>
       </Group>
     </form>
-  )
+  );
 }

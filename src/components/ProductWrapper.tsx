@@ -134,6 +134,7 @@ export default function ProductsWrapper({
           }}
         >
           <FormMemo
+            step={step}
             notificationId={notification.id}
             customer={notification.customers}
             getRating={() => $rating.current?.getRating()}
