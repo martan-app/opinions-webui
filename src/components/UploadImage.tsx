@@ -10,31 +10,39 @@ import {
   Image,
   Menu,
   Text,
-} from "@mantine/core"
+} from "@mantine/core";
 import {
   Dropzone,
   DropzoneProps,
   FileWithPath,
   IMAGE_MIME_TYPE,
-} from "@mantine/dropzone"
-import { useState } from "react"
-import UploadImageWithImgKit from "./../lib/imageUploader"
+} from "@mantine/dropzone";
+import { useState } from "react";
+import UploadImageWithImgKit from "./../lib/imageUploader";
 
 interface Props extends DropzoneProps {
-  onUpload: (files: any) => void
-  onError: (error: any) => void
-  onSkip: () => void
+  onUpload: (files: any) => void;
+  onError: (error: any) => void;
+  onSkip: () => void;
 }
 
 export function UploadImage(props: Partial<Props>) {
-  const { onUpload, onSkip, onError } = props
+  const { onUpload, onSkip, onError } = props;
 
-  const [isLoading, __isLoading] = useState(false)
-  const [files, __files] = useState<FileWithPath[]>([])
+  const [isLoading, __isLoading] = useState(false);
+  const [files, __files] = useState<FileWithPath[]>([]);
+
+  function removeItem(f: any) {
+    __files((old: any) => {
+      const newValue = old.filter((fl: any) => fl.name !== f.name);
+      console.log(newValue);
+      return newValue;
+    });
+  }
 
   const previews = files.map((file) => {
-    if (!file) return null
-    const imageUrl = window.URL.createObjectURL(file)
+    if (!file) return null;
+    const imageUrl = window.URL.createObjectURL(file);
     return (
       <Grid.Col key={file.name} span={3}>
         <Card
@@ -44,70 +52,8 @@ export function UploadImage(props: Partial<Props>) {
           key={file.name}
           sx={{
             maxWidth: "150px",
-            height: "150px",
           }}
         >
-          <Card.Section withBorder inheritPadding py="xs">
-            <Group position="apart">
-              <Menu withinPortal position="right-start" shadow="sm">
-                <Menu.Target>
-                  <ActionIcon>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="icon icon-tabler icon-tabler-dots"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path d="M5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                      <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                      <path d="M19 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                    </svg>
-                  </ActionIcon>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  <Menu.Item
-                    icon={
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="icon icon-tabler icon-tabler-trash"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        strokeWidth="2"
-                        stroke="currentColor"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path
-                          stroke="none"
-                          d="M0 0h24v24H0z"
-                          fill="none"
-                        ></path>
-                        <path d="M4 7l16 0"></path>
-                        <path d="M10 11l0 6"></path>
-                        <path d="M14 11l0 6"></path>
-                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
-                      </svg>
-                    }
-                    color="red"
-                  >
-                    Remover
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </Group>
-          </Card.Section>
-
           <Card.Section mt="sm">
             <div className="preview-pictures">
               <Image
@@ -118,37 +64,44 @@ export function UploadImage(props: Partial<Props>) {
               />
             </div>
           </Card.Section>
+
+          <Card.Section withBorder inheritPadding p="xs">
+            <Button variant="light" color="red" onClick={() => removeItem(file)}>
+              Remover
+            </Button>
+          </Card.Section>
         </Card>
       </Grid.Col>
-    )
-  })
+    );
+  });
 
   async function upload(): Promise<void> {
     if (files.length > 0) {
-      __isLoading(true)
-      const listOfPictures: any = []
+      __isLoading(true);
+      const listOfPictures: any = [];
       const promises = files.map((file) =>
         UploadImageWithImgKit(file)
           .then((img) => listOfPictures.push(img))
           .catch((err) => {
-            console.error(err)
+            console.error(err);
           })
-      )
+      );
 
       return Promise.all(promises)
         .then(() => {
           if (listOfPictures?.length && typeof onUpload === "function") {
-            onUpload(listOfPictures)
+            onUpload(listOfPictures);
           }
         })
         .finally(() => {
-          __isLoading(false)
-        })
+          __isLoading(false);
+        });
     }
   }
 
   function setFilesToUpload(data: []) {
-    __files(data)
+    const newFiles: any = [...files, ...data];
+    __files(newFiles.length >= 4 ? newFiles.slice(0, 4) : newFiles);
   }
 
   return (
@@ -159,7 +112,7 @@ export function UploadImage(props: Partial<Props>) {
         onDrop={setFilesToUpload}
         onReject={(files) => {
           if (typeof onError === "function") {
-            onError("Máximo de arquivos permitido: 5")
+            onError("Máximo de arquivos permitido: 5");
           }
         }}
         maxSize={3 * 1024 ** 2}
@@ -199,7 +152,7 @@ export function UploadImage(props: Partial<Props>) {
           variant="outline"
           onClick={() => {
             if (onSkip) {
-              onSkip()
+              onSkip();
             }
           }}
         >
@@ -209,12 +162,12 @@ export function UploadImage(props: Partial<Props>) {
         <Button
           disabled={isLoading}
           onClick={() => {
-            upload().catch(console.error)
+            upload().catch(console.error);
           }}
         >
           {isLoading ? "Enviando.." : "Enviar"}
         </Button>
       </Flex>
     </Box>
-  )
+  );
 }

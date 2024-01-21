@@ -10,7 +10,7 @@ class AppDocument extends Document {
     return (
       <Html>
         <Head />
-        <body>
+        <body style={{ touchAction: 'none' }}>
           <Main />
           <NextScript />
         </body>
