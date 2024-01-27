@@ -4,6 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import { AuthorContext } from "./../context/notification";
 import { useEffect, useState } from "react";
 import "./assets/style.css";
+import Script from "next/script";
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
@@ -35,6 +36,21 @@ export default function App(props: AppProps) {
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </Head>
+
+      <Script
+        strategy="lazyOnload"
+        src="https://www.googletagmanager.com/gtag/js?id=G-HR4YE1LY6M"
+      />
+
+      <Script id="gtag" strategy="lazyOnload">
+        {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+          
+            gtag('config', 'G-HR4YE1LY6M');
+            `}
+      </Script>
 
       <MantineProvider
         withGlobalStyles
