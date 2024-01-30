@@ -131,7 +131,9 @@ export function UploadImage(props: Partial<Props>) {
 
   return (
     <Box pt="lg">
-      <Text size="xl" mb="md">Adicione fotos</Text>
+      <Text size="xl">Adicione fotos</Text>
+      <Text c="dimmed" mb="md">Envie até 4 fotos do produto.</Text>
+
       <Dropzone
         multiple
         loading={isLoading}
@@ -155,9 +157,9 @@ export function UploadImage(props: Partial<Props>) {
             <Text size="xl" inline>
               Arraste imagens ou toque para adicionar.
             </Text>
-            <Text size="sm" color="dimmed" inline mt={7}>
+            {/* <Text size="sm" color="dimmed" inline mt={7}>
               Envie até 4 fotos do produto.
-            </Text>
+            </Text> */}
           </div>
         </Group>
       </Dropzone>

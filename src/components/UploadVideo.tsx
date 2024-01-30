@@ -76,9 +76,9 @@ export function UploadVideo(props: Partial<Props>) {
             __file(file);
             typeof onReady === "function" && onReady(file);
           }}
-          placeholder="Escolhe um video"
+          placeholder="Escolher um video"
           label="Video"
-          description="Gostou do produto? porque não envia um video?"
+          description="Gostou do produto? Por que não envia um video?"
         />
       </Flex>
 
