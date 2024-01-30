@@ -1,15 +1,14 @@
 /* eslint-disable react/display-name */
-import { Alert, Card } from "@mantine/core";
+import { Accordion, Alert, Card } from "@mantine/core";
 import { memo, useContext, useEffect, useRef, useState } from "react";
-import { AuthorContext } from "./../context/notification";
 import Form from "./Form";
-import IsRecommended, { IsRecommendedHandle } from "./IsRecommended";
 import Product, { ProductHandle } from "./Product";
-import RatingWrapper, { RatingWrapperHandle } from "./RatingWrapper";
 import AppStepper, { StepperHandle } from "./Stepper";
 import { UploadImage } from "./UploadImage";
 import { UploadVideo } from "./UploadVideo";
 import { NotificationsHandle } from "./notifications";
+import { AuthorContext } from "../context/notification";
+import { sanitize } from "string-sanitizer";
 
 interface ProductsProps {
   product: any;
@@ -28,16 +27,12 @@ export default function ProductsWrapper({
   const [reviewId, __reviewId] = useState<string | null>(null);
   const [step, __step] = useState<string>("review");
   const { author } = useContext<any>(AuthorContext);
-  const [value, setValue] = useState("sim");
 
   const [hasPictures, __hasPictures] = useState(false);
   const [hasVideo, __hasVideo] = useState(false);
-  const [hasReview, __hasReview] = useState(false);
 
   const $steper = useRef<StepperHandle>(null);
   const $rating = useRef<ProductHandle>(null);
-  const $ratingWrapper = useRef<RatingWrapperHandle>(null);
-  const $isRecommendedRef = useRef<IsRecommendedHandle>(null);
 
   async function updateReviewPictures(pictures: any[]): Promise<void> {
     __isLoading(true);
@@ -85,7 +80,7 @@ export default function ProductsWrapper({
     __isLoading(false);
   }
 
-  async function apiRequest(url: string, method: string, props: any) {
+  async function apiRequest(url: string, method: string, rating: number) {
     return fetch(url, {
       method,
 
@@ -95,11 +90,11 @@ export default function ProductsWrapper({
       },
 
       body: JSON.stringify({
-        ...props,
         author,
         order_ref: notification.order_id,
         product_id: product.product_id,
         product_sku: product.sku,
+        rating,
         customer: notification.customers.id,
         notification_id: notification.id,
       }),
@@ -113,13 +108,10 @@ export default function ProductsWrapper({
       );
 
       if (hasReview) {
-        // $steper.current?.setStep(3);
-        $ratingWrapper.current?.setReadOnly();
-        $ratingWrapper.current?.setRating(hasReview.rating);
+        $steper.current?.setStep(3);
         $rating.current?.setReadOnly();
         $rating.current?.setRating(hasReview.rating);
-        //__step("success");
-        __hasReview(true);
+        __step("success");
       }
     }
   }, [notification, product]);
@@ -134,24 +126,21 @@ export default function ProductsWrapper({
 
   function onCreateReview(id: string) {
     __reviewId(id);
-    __hasReview(true);
+    __step("pictures");
+    $steper.current?.nextStep();
     $rating.current?.setReadOnly();
-    $rating.current?.setRating($ratingWrapper.current?.getRating());
-    // __step("pictures");
-    // $steper.current?.nextStep();
-    // $rating.current?.setReadOnly();
   }
 
-  async function updateReview(props: any) {
+  async function updateRating(rating: number) {
     const url = `/api/reviews/${reviewId}/review`;
     try {
-      await apiRequest(url, "PATCH", props);
+      await apiRequest(url, 'PATCH', rating)  
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
   }
 
-  async function createReview(props: any) {
+  async function createReview(rating: number) {
     __isLoading(true);
 
     // const url = "/api/reviews";
@@ -174,7 +163,7 @@ export default function ProductsWrapper({
     //   }),
     // });
     const url = "/api/reviews";
-    const req = await apiRequest(url, "post", props);
+    const req = await apiRequest(url, 'post', rating)
     const res = await req.json();
 
     if (req.ok) {
@@ -184,31 +173,11 @@ export default function ProductsWrapper({
     __isLoading(false);
   }
 
-  function CreateOrUpdateWithRating(value: number) {
+  function CreateOrUpdate(value: number) {
     if (reviewId) {
-      updateReview({
-        rating: value,
-        is_recommended: $isRecommendedRef?.current?.getValue().is_recommended,
-      });
+      updateRating(value);
     } else {
-      createReview({
-        rating: value,
-        is_recommended: $isRecommendedRef?.current?.getValue().is_recommended,
-      });
-    }
-  }
-
-  function CreateOrUpdateWithIsRecommended(value: boolean) {
-    if (reviewId) {
-      updateReview({
-        is_recommended: value,
-        rating: $ratingWrapper?.current?.getRating(),
-      });
-    } else {
-      createReview({
-        is_recommended: value,
-        rating: $ratingWrapper?.current?.getRating(),
-      });
+      createReview(value);
     }
   }
 
@@ -227,68 +196,93 @@ export default function ProductsWrapper({
           image={getPictureUrl()}
           ref={$rating}
           onRating={(value) => {
-            CreateOrUpdateWithRating(value);
+            CreateOrUpdate(value);
           }}
-          hasReview={hasReview}
         />
       </Card.Section>
-{/* 
+
       <Card.Section p="lg">
         {" "}
         <AppStepper ref={$steper} />
-      </Card.Section> */}
+      </Card.Section>
 
       <Card.Section p="lg">
-        {!hasReview && (
-          <div
-            id="review--form"
-          >
-            <RatingWrapper
-              ref={$ratingWrapper}
-              onRating={(value) => {
-                CreateOrUpdateWithRating(value);
-              }}
-            />
+        <div
+          id="review--form"
+          style={{
+            display: step === "review" ? "block" : "none",
+          }}
+        >
+          <FormMemo
+            reviewId={reviewId}
+            step={step}
+            notificationId={notification.id}
+            customer={notification.customers}
+            getRating={() => $rating.current?.getRating()}
+            storeId={notification.store_id}
+            product={product}
+            order={notification.order_id}
+            onSave={({ id }: any): void => {
+              onCreateReview(id);
+            }}
+            onError={() => {
+              alertComponent?.error("Não foi possível enviar o review");
+            }}
+          />
+        </div>
 
-            <IsRecommended
-              ref={$isRecommendedRef}
-              onChange={(value) => {
-                CreateOrUpdateWithIsRecommended(value.is_recommended);
-              }}
-            />
+        <div
+          id="review--upload-pictures"
+          style={{
+            display: step === "pictures" ? "block" : "none",
+          }}
+        >
+          <UploadImage
+            onUpload={(file) => {
+              updateReviewPictures(file);
+            }}
+            onSkip={() => {
+              $steper.current?.nextStep();
+              __step("video");
+            }}
+            onError={(err) => {
+              alertComponent?.error(err || "Não foi possivel enviar imagens");
+            }}
+          />
+        </div>
 
-            <FormMemo
-              store={notification.stores}
-              reviewId={reviewId}
-              step={step}
-              notificationId={notification.id}
-              customer={notification.customers}
-              getRating={() => $ratingWrapper.current?.getRating()}
-              storeId={notification.store_id}
-              product={product}
-              order={notification.order_id}
-              onSave={({ id }: any): void => {
-                onCreateReview(id);
-              }}
-              onError={() => {
-                alertComponent?.error("Não foi possível enviar o review");
-              }}
-              onUploadPictures={(p: any[]) => updateReviewPictures(p)}
-              onUploadVideo={(v: string) => updateReviewVideo(v)}
-            />
-          </div>
-        )}
+        <div
+          id="review--upload-video"
+          style={{
+            display: step === "video" ? "block" : "none",
+          }}
+        >
+          <UploadVideo
+            hasVideo={hasVideo}
+            onUpload={(file) => {
+              updateReviewVideo(file);
+            }}
+            onSkip={(to) => {
+              to ? $steper.current?.backStep() : $steper.current?.nextStep();
+              __step(to ?? "success");
+            }}
+            onError={(err) => {
+              alertComponent?.error("Não foi possivel enviar seu vídeo");
+            }}
+          />
+        </div>
 
-        {hasReview && (
-          <div
-            id="review-success"
-          >
-            <Alert title="Enviado!" color="green" variant="light">
-              Sua avaliação foi enviada com sucesso! Te informaremos assim que
-              for publicada.
-            </Alert>
-          </div>
-        )}
+        <div
+          id="review-success"
+          style={{
+            display: step === "success" ? "block" : "none",
+          }}
+        >
+          <Alert title="Enviado!" color="green" variant="light">
+            Sua avaliação foi enviada com sucesso! Te informaremos assim que for
+            publicada.
+          </Alert>
+        </div>
       </Card.Section>
     </Card>
   );

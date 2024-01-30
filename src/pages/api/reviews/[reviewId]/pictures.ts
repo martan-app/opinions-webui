@@ -16,7 +16,7 @@ export default async function handler(
       },
     ]).eq("id", query.reviewId)
 
-    return error ? res.status(500).json(error) : res.status(204).send(null);
+    return error ? res.status(500).json(error) : res.status(204).end()
   } else {
     res.status(405).json({
       status: 405,

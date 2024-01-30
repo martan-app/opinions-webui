@@ -37,8 +37,6 @@ const AppStepper: ForwardRefRenderFunction<StepperHandle, StepperProps> = (
       color="green"
       active={active}
       orientation="horizontal"
-      mb="xl"
-      mt="sm"
       size="sm"
       breakpoint="xs"
     >

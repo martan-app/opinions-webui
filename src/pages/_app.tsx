@@ -12,13 +12,10 @@ export default function App(props: AppProps) {
 
   useEffect(() => {
     document.addEventListener("gesturestart", function (e) {
-      console.log(e);
       e.preventDefault();
     });
 
     document.addEventListener("touchmove", function (e) {
-      console.log(e);
-
       e.preventDefault();
     });
   }, []);

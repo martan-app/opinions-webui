@@ -1,35 +1,37 @@
-import { Box, Group, Image, Rating, Text } from "@mantine/core"
+import { Box, Group, Image, Rating, Text } from "@mantine/core";
 import {
   ForwardRefRenderFunction,
   forwardRef,
   useImperativeHandle,
   useState,
-} from "react"
+} from "react";
 
 interface ProductProps {
-  name: string
-  image?: string
-  openAcordion?: any
+  name: string;
+  image?: string;
+  openAcordion?: any;
+  onRating?: (value: any) => void;
+  hasReview?: boolean;
 }
 
 export type ProductHandle = {
-  getRating: () => any
-  setReadOnly: () => void
-  setRating: (rating: number) => void
-}
+  getRating: () => any;
+  setReadOnly: () => void;
+  setRating: (rating: number) => void;
+};
 
 const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
-  { name, image, openAcordion },
+  { name, image, openAcordion, onRating, hasReview },
   ref
 ) => {
-  const [rating, __rating] = useState(5)
-  const [isReadOnly, __isReadOnly] = useState(false)
+  const [rating, __rating] = useState(0);
+  const [isReadOnly, __isReadOnly] = useState(false);
 
   useImperativeHandle(ref, () => ({
     getRating: () => rating,
     setReadOnly: () => __isReadOnly(true),
     setRating: (rating) => __rating(rating),
-  }))
+  }));
 
   return (
     <Group noWrap>
@@ -68,22 +70,20 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         >
           {name}
         </Text>
-        <Text size="sm" color="dimmed" weight={400}>
-          <Rating
-            onChange={(r) => {
-              __rating(r)
-              typeof openAcordion === "function" && openAcordion()
-            }}
-            defaultValue={rating}
-            name={name}
-            readOnly={isReadOnly}
-            size="lg"
-            mt="md"
-          />
-        </Text>
+        {hasReview && (
+          <Text size="sm" color="dimmed" weight={400}>
+            <Rating
+              defaultValue={rating}
+              name={name}
+              readOnly={hasReview}
+              size="xl"
+              mt="md"
+            />
+          </Text>
+        )}
       </Box>
     </Group>
-  )
-}
+  );
+};
 
-export default forwardRef(Product)
+export default forwardRef(Product);

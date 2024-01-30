@@ -1,3 +1,11 @@
 .preview-pictures img {
   max-height: 67px;
 }
+
+.mantine-Dropzone-root {
+  max-height: 100px;
+}
+
+.mantine-Dropzone-root .mantine-Group-root {
+  min-height: auto !important;
+}
