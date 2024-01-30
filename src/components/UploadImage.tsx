@@ -21,13 +21,14 @@ import { useState } from "react";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 
 interface Props extends DropzoneProps {
-  onUpload: (files: any) => void;
-  onError: (error: any) => void;
-  onSkip: () => void;
+  onUpload?: (files: any) => void;
+  onReady?: (files: any) => void;
+  onError?: (error: any) => void;
+  onSkip?: () => void;
 }
 
 export function UploadImage(props: Partial<Props>) {
-  const { onUpload, onSkip, onError } = props;
+  const { onUpload, onSkip, onError, onReady } = props;
 
   const [isLoading, __isLoading] = useState(false);
   const [files, __files] = useState<FileWithPath[]>([]);
@@ -35,7 +36,6 @@ export function UploadImage(props: Partial<Props>) {
   function removeItem(f: any) {
     __files((old: any) => {
       const newValue = old.filter((fl: any) => fl.name !== f.name);
-      console.log(newValue);
       return newValue;
     });
   }
@@ -125,11 +125,13 @@ export function UploadImage(props: Partial<Props>) {
 
   function setFilesToUpload(data: []) {
     const newFiles: any = [...files, ...data];
+    typeof onReady === 'function' && onReady(newFiles)
     __files(newFiles.length >= 4 ? newFiles.slice(0, 4) : newFiles);
   }
 
   return (
-    <Box>
+    <Box pt="lg">
+      <Text size="xl" mb="md">Adicione fotos</Text>
       <Dropzone
         multiple
         loading={isLoading}
@@ -162,7 +164,7 @@ export function UploadImage(props: Partial<Props>) {
 
       <Grid mt={previews.length > 0 ? "xl" : 0}>{previews}</Grid>
 
-      <Flex
+      {/* <Flex
         mih={50}
         gap="md"
         justify="flex-end"
@@ -191,7 +193,7 @@ export function UploadImage(props: Partial<Props>) {
         >
           {isLoading ? "Enviando.." : "Enviar"}
         </Button>
-      </Flex>
+      </Flex> */}
     </Box>
   );
 }

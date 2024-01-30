@@ -1,21 +1,21 @@
-import { verify } from "jsonwebtoken"
-import supabase from "../utils/supabase-client"
+import { verify } from "jsonwebtoken";
+import supabase from "../utils/supabase-client";
 
 export async function getServerSideProps(context: any) {
-  const { query } = context
-  const token = process.env.NOTIFICATION_TOKEN ?? ""
-  let decodedToken: any = null
+  const { query } = context;
+  const token = process.env.NOTIFICATION_TOKEN ?? "";
+  let decodedToken: any = null;
 
   if (query.t && query.notification) {
     try {
-      decodedToken = verify(query.t || "", token)
+      decodedToken = verify(query.t || "", token);
     } catch (error) {
       return {
         redirect: {
           permanent: false,
           destination: "/not-valid?reason=expired",
         },
-      }
+      };
     }
 
     const { data, error: notErr } = await supabase
@@ -25,7 +25,7 @@ export async function getServerSideProps(context: any) {
       id,
       orders(id, order_id, products),
       customers(name, id),
-      stores(name, url, logo_url),
+      stores(name, url, logo_url,is_enable_video,is_enable_pictures),
       order_id,
       store_id,
       status,
@@ -33,7 +33,7 @@ export async function getServerSideProps(context: any) {
       reviews
     `
       )
-      .eq("id", query.notification)
+      .eq("id", query.notification);
 
     if (notErr || !data.length) {
       return {
@@ -41,7 +41,7 @@ export async function getServerSideProps(context: any) {
           permanent: false,
           destination: "/not-found",
         },
-      }
+      };
     }
 
     if (
@@ -53,19 +53,19 @@ export async function getServerSideProps(context: any) {
           permanent: false,
           destination: "/not-valid?reason=storeId,token",
         },
-      }
+      };
     }
 
-    const notificationBody: any = data[0]
+    const notificationBody: any = data[0];
 
     if (notificationBody) {
       const { data: products } = await supabase
         .from("products")
         .select("id, name, sku, url, pictures, product_id")
-        .in("id", notificationBody.orders.products)
+        .in("id", notificationBody.orders.products);
 
       if (products) {
-        notificationBody.productBody = products
+        notificationBody.productBody = products;
       }
 
       // reviews
@@ -73,10 +73,10 @@ export async function getServerSideProps(context: any) {
         const { data: reviews } = await supabase
           .from("reviews")
           .select("id, product_id, status, rating")
-          .in("id", notificationBody.reviews)
+          .in("id", notificationBody.reviews);
 
         if (reviews && reviews.length > 0) {
-          notificationBody.reviews = reviews
+          notificationBody.reviews = reviews;
         }
       }
     }
@@ -86,7 +86,7 @@ export async function getServerSideProps(context: any) {
         notification: notificationBody,
         decodedToken,
       },
-    }
+    };
   }
 
   return {
@@ -94,5 +94,5 @@ export async function getServerSideProps(context: any) {
       permanent: false,
       destination: "/not-found",
     },
-  }
+  };
 }

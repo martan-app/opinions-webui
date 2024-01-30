@@ -11,6 +11,10 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { sanitize } from "string-sanitizer";
 import { AuthorContext } from "./../context/notification";
 import Author from "./Author";
+import { UploadImage } from "./UploadImage";
+import { UploadVideo } from "./UploadVideo";
+import UploadImageWithImgKit from "./../lib/imageUploader";
+import imagekit from "./../utils/imagekit-client";
 
 interface ProductsProps {
   getRating: () => number;
@@ -18,28 +22,36 @@ interface ProductsProps {
   notificationId: string;
   order: any;
   product: any;
-  token: string;
   onSave: (reviewId: any) => void;
+  onUploadVideo: (file: any) => void;
+  onUploadPictures: (files: any) => void;
   onError: (error: any) => void;
   customer: any;
   step: string;
+  reviewId?: string;
+  store?: any;
 }
 
 export default function Form({
   step,
   order,
   product,
-  token,
   onSave,
   onError,
   getRating,
   storeId,
   customer,
   notificationId,
+  reviewId,
+  store,
+  onUploadVideo,
+  onUploadPictures,
 }: ProductsProps) {
-  console.log({ step });
   const [isLoading, __isLoading] = useState(false);
   const { author } = useContext<any>(AuthorContext);
+
+  const [pictures, setPictures] = useState<any>(null);
+  const [video, setVideo] = useState<any>(null);
 
   const form = useForm({
     initialValues: {
@@ -68,40 +80,134 @@ export default function Form({
       }
     });
 
-    const url = "/api/reviews";
-    const req = await fetch(url, {
-      method: "POST",
+    let url = "/api/reviews";
+    let method = "POST";
 
+    if (reviewId) {
+      url += `/${reviewId}/review`;
+      method = "PATCH";
+    }
+
+    //const url = "/api/reviews";
+    const req = await fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
-        "X-Token": token,
         "X-Store-Id": String(storeId),
       },
 
       body: JSON.stringify({
         ...values,
-        order,
-        product: product.product_id,
-        sku: product.sku,
+        order_ref: order,
+        product_id: product.product_id,
+        product_sku: product.sku,
         rating: getRating(),
-        customer,
+        customer: customer.id,
         notification_id: notificationId,
       }),
     });
 
-    const res = await req.json();
-    if (req.ok && typeof onSave === "function") {
-      onSave(res);
-    } else if (!req.ok && req.status >= 400) {
-      onError(res);
+    const uploads = async () => {
+      const promises = [];
+      if (store?.is_enable_pictures && pictures?.length) {
+        promises.push(uploadPictures());
+      }
+
+      if (store?.is_enable_video && video) {
+        promises.push(uploadVideo());
+      }
+
+      await Promise.all(promises);
+    };
+
+    if (reviewId) {
+      if (req.ok && req.status === 204) {
+        onSave(reviewId);
+      }
+
+      uploads();
+    } else {
+      const res = await req.json();
+      if (req.ok && typeof onSave === "function") {
+        onSave(res);
+        uploads();
+      } else if (!req.ok && req.status >= 400) {
+        onError(res);
+      }
     }
 
     __isLoading(false);
   }
 
+  async function uploadVideo() {
+    if (video) {
+      __isLoading(true);
+      try {
+        const videoRes = await imagekit.upload({
+          file: video,
+          fileName: video.name,
+          useUniqueFileName: true,
+          folder: "videos/reviews/",
+          tags: ["reviews"],
+        });
+
+        const url = imagekit.url({
+          path: videoRes.filePath,
+          urlEndpoint: process.env.NEXT_PUBLIC_IMGKIT_ENDPOINT,
+          transformation: [
+            {
+              format: "auto",
+              quality: "80",
+              cropMode: "pad_resize",
+              height: "500",
+              width: "500",
+              aspectRatio: "4-3",
+            },
+          ],
+        });
+
+        if (typeof onUploadVideo === "function" && url) {
+          onUploadVideo(url);
+        }
+      } catch (error) {
+        if (typeof onError === "function") {
+          onError(error);
+        }
+      } finally {
+        __isLoading(false);
+      }
+    }
+  }
+
+  async function uploadPictures(): Promise<void> {
+    if (pictures?.length) {
+      __isLoading(true);
+      const listOfPictures: any = [];
+      const promises = pictures?.map((file: File) =>
+        UploadImageWithImgKit(file)
+          .then((img) => listOfPictures.push(img))
+          .catch((err) => {
+            console.error(err);
+          })
+      );
+
+      return Promise.all(promises)
+        .then(() => {
+          if (
+            listOfPictures?.length &&
+            typeof onUploadPictures === "function"
+          ) {
+            onUploadPictures(listOfPictures);
+          }
+        })
+        .finally(() => {
+          __isLoading(false);
+        });
+    }
+  }
+
   const buttonLabel = useCallback(
     function () {
-      console.log({isLoading, step})
       if (isLoading) {
         return "Enviando..";
       }
@@ -120,52 +226,70 @@ export default function Form({
   );
 
   return (
-    <form onSubmit={form.onSubmit((values) => createReview(values))}>
-      <Box>
-        <Author
-          onChange={(author) => {
-            if (author) {
-              form.setFieldValue("author", author);
-            }
-          }}
-        />
-
-        <TextInput
-          withAsterisk
-          placeholder="Exemplo: Fácil manuseio"
-          label="Título"
-          description="Escreva um título para a sua avaliação"
-          size="md"
-          mb="xl"
-          {...form.getInputProps("title")}
-        />
-
-        <Textarea
-          placeholder="Exemplo; foi facil a montagem, bem acabado.."
-          label="Seu comentário"
-          description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
-          error="Verifique o campo"
-          size="md"
-          autosize
-          maxRows={10}
-          minRows={4}
-          withAsterisk
-          {...form.getInputProps("body")}
-        />
-
+    <>
+      <form onSubmit={form.onSubmit((values) => createReview(values))}>
+        {/* <Box>
         <Checkbox
+          size="xl"
           mt="md"
           label="Você recomendaria este produto?"
           {...form.getInputProps("is_recommended", { type: "checkbox" })}
         />
-      </Box>
+      </Box> */}
 
-      <Group position="right" mt="md" mb="mb">
-        <Button type="submit" disabled={isLoading}>
-          {/* {isLoading ? "Enviando.." : "Enviar"} */}
-          {buttonLabel()}
-        </Button>
-      </Group>
-    </form>
+        <Box>
+          <Author
+            onChange={(author) => {
+              if (author) {
+                form.setFieldValue("author", author);
+              }
+            }}
+          />
+
+          <TextInput
+            placeholder="Exemplo: Fácil manuseio"
+            label="Título"
+            description="Escreva um título para a sua avaliação"
+            size="lg"
+            mb="xl"
+            {...form.getInputProps("title")}
+          />
+
+          <Textarea
+            placeholder="Exemplo; foi facil a montagem, bem acabado.."
+            label="Seu comentário"
+            description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
+            error="Verifique o campo"
+            size="lg"
+            autosize
+            maxRows={10}
+            minRows={4}
+            {...form.getInputProps("body")}
+          />
+        </Box>
+
+        {store?.is_enable_pictures && (
+          <UploadImage
+            onReady={(files) => {
+              setPictures(files);
+            }}
+          />
+        )}
+
+        {store?.is_enable_video && (
+          <UploadVideo
+            onReady={(files) => {
+              setVideo(files);
+            }}
+          />
+        )}
+
+        <Group position="right" mt="md" mb="mb">
+          <Button size="lg" type="submit" disabled={isLoading}>
+            {buttonLabel()}
+          </Button>
+        </Group>
+      </form>
+    </>
   );
 }
