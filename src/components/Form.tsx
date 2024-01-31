@@ -62,11 +62,11 @@ export default function Form({
     },
 
     validate: {
-      title: (value) => (!value.length ? "Campo obrigatório" : null),
-      body: (value) =>
-        value.length < 10
-          ? "A avaliação precisa ter no mínimo 10 caracteres"
-          : null,
+      // title: (value) => (!value.length ? "Campo obrigatório" : null),
+      // body: (value) =>
+      //   value.length < 10
+      //     ? "A avaliação precisa ter no mínimo 10 caracteres"
+      //     : null,
     },
   });
 

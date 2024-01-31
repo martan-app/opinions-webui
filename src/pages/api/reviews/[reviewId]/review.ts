@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import supabase from "./../../../../utils/supabase-client";
+import { log } from "@logtail/next";
 
 type Data = any;
 
@@ -10,13 +11,18 @@ export default async function handler(
 ) {
   if (req.method === "PATCH") {
     const { body, query } = req;
-
     const { error } = await supabase
       .from("reviews")
       .update([body])
       .eq("id", query.reviewId);
     // res.setHeader('Content-Type', 'application/json')
-    return error ? res.status(500).json(error) : res.status(204).end();
+    if (!error) {
+      log.info("Avaliacao atualizada com sucesso!", { body, query });
+      res.status(204).end()
+    } else {
+      log.error("Erro ao atualizar a avaliacao", { body, error, query });
+      res.status(500).json(error)
+    }
   } else {
     res.status(405).json({
       status: 405,

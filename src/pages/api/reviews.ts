@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import supabase from "../../utils/supabase-client";
 import sinitizer from "string-sanitizer";
+import { log } from "@logtail/next";
 
 type Data = any;
 
@@ -37,6 +38,7 @@ export default async function handler(
       .select("id");
 
     if (data && data.length > 0) {
+      log.info("Avaliação criada com sucesso!", { body, payload});
       const { error } = await supabase.rpc(
         "add_review_id_to_notification_body",
         {
@@ -48,6 +50,7 @@ export default async function handler(
 
       res.status(201).json(data[0]);
     } else if (error) {
+      log.error("Erro ao criar a avaliacao", { body, error, payload });
       res.status(500).json(error);
     }
   } else {
