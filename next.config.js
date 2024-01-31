@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const { withLogtail } = require('@logtail/next');
+
 const nextConfig = {
   experimental: {
     appDir: false,
@@ -6,4 +8,4 @@ const nextConfig = {
   poweredByHeader: false,
 }
 
-module.exports = nextConfig
+module.exports = withLogtail(nextConfig)

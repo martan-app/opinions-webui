@@ -1,15 +1,16 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next"
-import supabase from "../../../../utils/supabase-client"
+import type { NextApiRequest, NextApiResponse } from "next";
+import supabase from "../../../../utils/supabase-client";
+import { log } from "@logtail/next";
 
-type Data = any
+type Data = any;
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
   if (req.method === "PATCH") {
-    const { body, query } = req
+    const { body, query } = req;
     const { error } = await supabase
       .from("reviews")
       .update([
@@ -17,9 +18,19 @@ export default async function handler(
           video_url: body,
         },
       ])
-      .eq("id", query.reviewId)
+      .eq("id", query.reviewId);
 
-    return error ? res.status(500).json(error) : res.status(204).end()
+    if (!error) {
+      log.info("Video adicionado com sucesso a avaliacao!", { body, query });
+      res.status(204).end();
+    } else {
+      log.error("Erro ao adicionar vídeo na avaliacao", {
+        body,
+        error,
+        query,
+      });
+      res.status(500).json(error);
+    }
   } else {
     res.status(405).json({
       status: 405,
@@ -30,6 +41,6 @@ export default async function handler(
         pt_br: "Metodo não permitido",
       },
       more_info: null,
-    })
+    });
   }
 }
