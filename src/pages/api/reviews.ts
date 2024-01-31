@@ -27,7 +27,7 @@ export default async function handler(
     const sanitizeProps = ["author", "title", "body"];
     sanitizeProps.forEach((prop) => {
       if (body[prop]) {
-        payload[prop] = sinitizer.sanitize.keepUnicode(prop);
+        payload[prop] = sinitizer.sanitize.keepUnicode(body[prop]);
       }
     });
 
