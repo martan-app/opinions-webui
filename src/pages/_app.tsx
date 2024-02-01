@@ -4,6 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import { AuthorContext } from "./../context/notification";
 import { useEffect, useState } from "react";
 import "./assets/style.css";
+import '@smastrom/react-rating/style.css'
 import Script from "next/script";
 
 export default function App(props: AppProps) {
