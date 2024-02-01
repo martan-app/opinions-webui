@@ -1,4 +1,4 @@
-import { Box, Flex, Group, Image, Text, rem } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 import { Rating } from "@smastrom/react-rating";
 import {
   ForwardRefRenderFunction,

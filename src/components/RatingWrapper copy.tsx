@@ -1,4 +1,4 @@
-import { Box, Flex, Group, Image, Rating, Text, rem } from "@mantine/core";
+import { Flex, Group, Rating, Text } from "@mantine/core";
 import {
   ForwardRefRenderFunction,
   forwardRef,
