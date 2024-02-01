@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -15,8 +16,10 @@ import { UploadImage } from "./UploadImage";
 import { UploadVideo } from "./UploadVideo";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
+import { NotificationsHandle } from "./notifications";
 
 interface ProductsProps {
+  alertComponent: NotificationsHandle;
   getRating: () => number;
   storeId: number;
   notificationId: string;
@@ -33,6 +36,7 @@ interface ProductsProps {
 }
 
 export default function Form({
+  alertComponent,
   step,
   order,
   product,
@@ -53,9 +57,11 @@ export default function Form({
   const [pictures, setPictures] = useState<any>(null);
   const [video, setVideo] = useState<any>(null);
 
+  const [errorRating, setErrorRating] = useState(false);
+
   const form = useForm({
     initialValues: {
-      author: author,
+      author,
       title: "",
       body: "",
       is_recommended: true,
@@ -71,6 +77,12 @@ export default function Form({
   });
 
   async function createReview(values: any) {
+    console.log(getRating(), alertComponent);
+    if (getRating() <= 0) {
+      setErrorRating(true);
+      return;
+    }
+    setErrorRating(false);
     __isLoading(true);
 
     const fieldsToSanitize = ["author", "title", "body"];
@@ -261,6 +273,7 @@ export default function Form({
             description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
             error="Verifique o campo"
             size="lg"
+            mb="xl"
             autosize
             maxRows={10}
             minRows={4}
@@ -282,6 +295,19 @@ export default function Form({
               setVideo(files);
             }}
           />
+        )}
+
+        {errorRating && (
+          <Alert
+            title="Escolha uma nota para o produto"
+            color="red"
+            withCloseButton
+            onClose={() => setErrorRating(false)}
+            variant="filled"
+          >
+            Escolha uma nota de 1 a 5 para o produto antes de enviar o
+            formulário.
+          </Alert>
         )}
 
         <Group position="right" mt="md" mb="mb">

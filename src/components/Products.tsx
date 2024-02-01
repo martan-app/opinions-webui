@@ -14,6 +14,7 @@ export default function Products({
   notification,
   alertComponent,
 }: ProductsProps) {
+  console.log(alertComponent)
   const [acordionOpen, __acordionOpen] = useState<any>(true)
   const list = products.map((item) => (
     <ProductsWrapper

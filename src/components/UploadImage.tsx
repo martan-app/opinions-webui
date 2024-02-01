@@ -130,11 +130,12 @@ export function UploadImage(props: Partial<Props>) {
   }
 
   return (
-    <Box pt="lg">
+    <Box pt="lg" mb="xl">
       <Text size="xl">Adicione fotos</Text>
       <Text c="dimmed" mb="md">Envie até 4 fotos do produto.</Text>
 
       <Dropzone
+      mb="xl"
         multiple
         loading={isLoading}
         onDrop={setFilesToUpload}

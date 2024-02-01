@@ -1,23 +1,10 @@
-import { Flex, Text } from "@mantine/core";
-import { Rating } from "@smastrom/react-rating";
+import { Flex, Group, Rating, Text } from "@mantine/core";
 import {
   ForwardRefRenderFunction,
   forwardRef,
   useImperativeHandle,
   useState,
 } from "react";
-
-const CUSTOM_GROUP_LABEL = "O que achou do produto?";
-const CUSTOM_GROUP_LABEL_ID = "group_label";
-
-const CUSTOM_ITEM_LABELS = ["Ruim", "Fraco", "Médio", "Muito Bom", "Excelente"];
-const CUSTOM_ITEM_LABELS_IDS = [
-  "label_1",
-  "label_2",
-  "label_3",
-  "label_4",
-  "label_5",
-];
 
 interface RatingProps {
   onRating?: (value: any) => void;
@@ -43,13 +30,13 @@ const RatingWrapper: ForwardRefRenderFunction<
   }));
 
   return (
-    <Flex direction="column" align="center" mb="xl">
+    <Flex direction="column" align="center" mb="lg">
       <Text size="xl" fw={500}>
         Escolha uma nota para o produto!
       </Text>
       <Text c="gray">Campo obrigatório</Text>
 
-      {/* <Group>
+      <Group>
         <Rating
           onChange={(r) => {
             __rating(r);
@@ -61,23 +48,10 @@ const RatingWrapper: ForwardRefRenderFunction<
           mt="md"
         />
 
-        <Text size="xl" fw={500}>
+        {/* <Text size="xl" fw={500}>
           ({rating})
-        </Text>
-      </Group> */}
-
-      <div role="group" style={{ maxWidth: 400, width: "100%" }}>
-        <Rating
-          value={rating}
-          // itemStyles={customStyles}
-          onChange={__rating}
-          visibleLabelId={CUSTOM_GROUP_LABEL_ID}
-          invisibleItemLabels={CUSTOM_ITEM_LABELS}
-          spaceBetween="small"
-          spaceInside="medium"
-          transition="colors"
-        />
-      </div>
+        </Text> */}
+      </Group>
     </Flex>
   );
 };

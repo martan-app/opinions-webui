@@ -205,10 +205,11 @@ export default function ProductsWrapper({
         rating: $ratingWrapper?.current?.getRating(),
       });
     } else {
-      createReview({
-        is_recommended: value,
-        rating: $ratingWrapper?.current?.getRating(),
-      });
+      $ratingWrapper?.current?.getRating() > 0 &&
+        createReview({
+          is_recommended: value,
+          rating: $ratingWrapper?.current?.getRating(),
+        });
     }
   }
 
@@ -232,7 +233,7 @@ export default function ProductsWrapper({
           hasReview={hasReview}
         />
       </Card.Section>
-{/* 
+      {/* 
       <Card.Section p="lg">
         {" "}
         <AppStepper ref={$steper} />
@@ -240,9 +241,7 @@ export default function ProductsWrapper({
 
       <Card.Section p="lg">
         {!hasReview && (
-          <div
-            id="review--form"
-          >
+          <div id="review--form">
             <RatingWrapper
               ref={$ratingWrapper}
               onRating={(value) => {
@@ -258,6 +257,7 @@ export default function ProductsWrapper({
             />
 
             <FormMemo
+              alertComponent={alertComponent}
               store={notification.stores}
               reviewId={reviewId}
               step={step}
@@ -280,9 +280,7 @@ export default function ProductsWrapper({
         )}
 
         {hasReview && (
-          <div
-            id="review-success"
-          >
+          <div id="review-success">
             <Alert title="Enviado!" color="green" variant="light">
               Sua avaliação foi enviada com sucesso! Te informaremos assim que
               for publicada.
