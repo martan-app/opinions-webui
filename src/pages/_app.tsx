@@ -50,7 +50,7 @@ export default function App(props: AppProps) {
             `}
       </Script>
 
-      <Script id="clarity" strategy="lazyOnload">
+      <Script id="clarity" strategy="lazyOnload" crossOrigin="anonymous">
         {`(function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
