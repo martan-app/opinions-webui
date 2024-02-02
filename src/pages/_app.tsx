@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import "./assets/style.css";
 import '@smastrom/react-rating/style.css'
 import Script from "next/script";
+import { clarity } from 'react-microsoft-clarity';
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
@@ -19,6 +20,8 @@ export default function App(props: AppProps) {
     document.addEventListener("touchmove", function (e) {
       e.preventDefault();
     });
+
+    clarity.init("kugnxhmp7p")
   }, []);
 
   return (
@@ -50,13 +53,13 @@ export default function App(props: AppProps) {
             `}
       </Script>
 
-      <Script id="clarity" strategy="lazyOnload" crossOrigin="anonymous">
+      {/* <Script id="clarity" strategy="lazyOnload" crossOrigin="use-credentials">
         {`(function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "kugnxhmp7p");`}
-      </Script>
+      </Script> */}
 
       <MantineProvider
         withGlobalStyles

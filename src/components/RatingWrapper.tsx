@@ -76,6 +76,7 @@ const RatingWrapper: ForwardRefRenderFunction<
           spaceBetween="small"
           spaceInside="medium"
           transition="colors"
+          isRequired
         />
       </div>
     </Flex>
