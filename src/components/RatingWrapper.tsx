@@ -43,12 +43,23 @@ const RatingWrapper: ForwardRefRenderFunction<
   }));
 
   return (
-    <Flex direction="column" align="center" mb="xl">
+    <Flex
+      direction="column"
+      align="center"
+      mb="xl"
+      style={{
+        marginBottom: "2rem",
+      }}
+    >
       <Text size="xl" fw={500}>
-        Escolha uma nota para o produto!
+        Escolha uma nota para o produto
       </Text>
-      <Text c="gray">Campo obrigatório</Text>
 
+      {rating <= 0 && (
+        <Text size="xs" c="gray">
+          Resposta obrigatório
+        </Text>
+      )}
       {/* <Group>
         <Rating
           onChange={(r) => {
