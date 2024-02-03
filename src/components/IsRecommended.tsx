@@ -1,13 +1,9 @@
 import {
-  Radio,
-  Box,
-  Flex,
-  Group,
-  Image,
-  Rating,
-  Text,
   Button,
+  Group,
+  Text
 } from "@mantine/core";
+import { IconThumbDown, IconThumbUp } from "@tabler/icons-react";
 import {
   ForwardRefRenderFunction,
   forwardRef,
@@ -61,26 +57,40 @@ const IsRecommended: ForwardRefRenderFunction<
     <Group
       style={{
         flexDirection: "column",
+        marginBottom: '3rem'
       }}
     >
-      <Text size="xl" fw={500}>
-        Você recomendaria o produto
+      <Text size="xl" fw={500} align="center">
+        Você recomendaria esse produto
       </Text>
 
-      <Group>
+      <Group w="100%" align="center" sx={{
+        justifyContent: 'center'
+      }}>
         <Button
           onClick={() => setValue("sim")}
           color="green"
           size="lg"
           variant={value === "sim" ? "filled" : "outline"}
+          style={{
+            maxWidth:'150px',
+            width: '100%'
+          }}
+          leftIcon={<IconThumbUp />}
         >
           Sim
         </Button>
+
         <Button
           onClick={() => setValue("nao")}
           color="red"
           size="lg"
-          variant={value === "nao" ? "filled" : "outline"}
+          variant={value === "nao" ? "filled" : "outline"}style={{
+            maxWidth:'150px',
+            width: '100%'
+          }}
+          leftIcon={<IconThumbDown />}
+
         >
           Não
         </Button>

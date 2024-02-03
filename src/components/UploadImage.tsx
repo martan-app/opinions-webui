@@ -19,6 +19,11 @@ import {
 } from "@mantine/dropzone";
 import { useState } from "react";
 import UploadImageWithImgKit from "./../lib/imageUploader";
+import {
+  IconCamera,
+  IconImageInPicture,
+  IconPictureInPicture,
+} from "@tabler/icons-react";
 
 interface Props extends DropzoneProps {
   onUpload?: (files: any) => void;
@@ -65,9 +70,14 @@ export function UploadImage(props: Partial<Props>) {
             </div>
           </Card.Section>
 
-          <Card.Section withBorder inheritPadding p="0" sx={{
-            textAlign: 'center'
-          }}>
+          <Card.Section
+            withBorder
+            inheritPadding
+            p="0"
+            sx={{
+              textAlign: "center",
+            }}
+          >
             <Button
               variant="light"
               color="red"
@@ -125,17 +135,19 @@ export function UploadImage(props: Partial<Props>) {
 
   function setFilesToUpload(data: []) {
     const newFiles: any = [...files, ...data];
-    typeof onReady === 'function' && onReady(newFiles)
+    typeof onReady === "function" && onReady(newFiles);
     __files(newFiles.length >= 4 ? newFiles.slice(0, 4) : newFiles);
   }
 
   return (
     <Box pt="lg" mb="xl">
       <Text size="xl">Adicione fotos</Text>
-      <Text c="dimmed" mb="md">Envie até 4 fotos do produto.</Text>
+      <Text c="dimmed" mb="md">
+        Envie até 4 fotos do produto.
+      </Text>
 
       <Dropzone
-      mb="xl"
+        mb="xl"
         multiple
         loading={isLoading}
         onDrop={setFilesToUpload}
@@ -152,16 +164,15 @@ export function UploadImage(props: Partial<Props>) {
         <Group
           position="center"
           spacing="xl"
-          style={{ minHeight: 220, pointerEvents: "none" }}
+          style={{ minHeight: 250, pointerEvents: "none" }}
         >
-          <div>
-            <Text size="xl" inline>
-              Arraste imagens ou toque para adicionar.
-            </Text>
-            {/* <Text size="sm" color="dimmed" inline mt={7}>
+          
+          <Text c="gray" align="center" size="md" inline>
+          Arraste imagens ou toque para adicionar.
+          </Text>
+          {/* <Text size="sm" color="dimmed" inline mt={7}>
               Envie até 4 fotos do produto.
             </Text> */}
-          </div>
         </Group>
       </Dropzone>
 

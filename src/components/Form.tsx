@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   Group,
+  Text,
   Textarea,
   TextInput,
 } from "@mantine/core";
@@ -77,7 +78,6 @@ export default function Form({
   });
 
   async function createReview(values: any) {
-    console.log(getRating(), alertComponent);
     if (getRating() <= 0) {
       setErrorRating(true);
       return;
@@ -232,7 +232,7 @@ export default function Form({
         return "Enviar vídeo";
       }
 
-      return "Enviar";
+      return "Publicar";
     },
     [isLoading, step]
   );
@@ -250,28 +250,12 @@ export default function Form({
       </Box> */}
 
         <Box>
-          <Author
-            onChange={(author) => {
-              if (author) {
-                form.setFieldValue("author", author);
-              }
-            }}
-          />
-
-          <TextInput
-            placeholder="Exemplo: Fácil manuseio"
-            label="Título"
-            description="Escreva um título para a sua avaliação"
-            size="lg"
-            mb="xl"
-            {...form.getInputProps("title")}
-          />
-
           <Textarea
-            placeholder="Exemplo; foi facil a montagem, bem acabado.."
-            label="Seu comentário"
-            description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
-            error="Verifique o campo"
+            placeholder="Exemplo; foi facil a montagem, bem acabado, etc e tal."
+            label="Conte o que você achou do produto"
+            // description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
+            description=" "
+            // error="Verifique o campo"
             size="lg"
             mb="xl"
             autosize
@@ -279,6 +263,21 @@ export default function Form({
             minRows={4}
             {...form.getInputProps("body")}
           />
+
+          <TextInput
+            placeholder="Resuma sua avaliação em poucas palavras"
+            label="Mais algum ponto que devemos saber?"
+            // description="Escreva um título para a sua avaliação"
+            description=" "
+            size="lg"
+            // mb="xl"
+            maxLength={70}
+            {...form.getInputProps("title")}
+          />
+
+          <Group position="right">
+            <Text c="gray"><strong>{70 - form?.values?.title?.length}</strong> caracteres restante</Text>
+          </Group>
         </Box>
 
         {store?.is_enable_pictures && (
@@ -304,14 +303,32 @@ export default function Form({
             withCloseButton
             onClose={() => setErrorRating(false)}
             variant="filled"
+            mb="md"
           >
             Escolha uma nota de 1 a 5 para o produto antes de enviar o
             formulário.
           </Alert>
         )}
 
-        <Group position="right" mt="md" mb="mb">
-          <Button size="lg" type="submit" disabled={isLoading}>
+        <Author
+          onChange={(author) => {
+            if (author) {
+              form.setFieldValue("author", author);
+            }
+          }}
+        />
+
+        <Group position="center" mt="md" mb="mb" w="100%">
+          <Button
+            size="lg"
+            type="submit"
+            disabled={isLoading}
+            style={{
+              maxWidth: "280px",
+              width: "100%",
+            }}
+            color="blue.8"
+          >
             {buttonLabel()}
           </Button>
         </Group>

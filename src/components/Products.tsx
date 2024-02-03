@@ -1,12 +1,12 @@
-import { Accordion } from "@mantine/core"
-import ProductsWrapper from "./ProductWrapper"
-import { NotificationsHandle } from "./notifications"
-import { useMemo, useState } from "react"
+import { Accordion } from "@mantine/core";
+import ProductsWrapper from "./ProductWrapper";
+import { NotificationsHandle } from "./notifications";
+import { useMemo, useState } from "react";
 
 interface ProductsProps {
-  products: any[]
-  notification: any
-  alertComponent?: NotificationsHandle | null
+  products: any[];
+  notification: any;
+  alertComponent?: NotificationsHandle | null;
 }
 
 export default function Products({
@@ -14,8 +14,7 @@ export default function Products({
   notification,
   alertComponent,
 }: ProductsProps) {
-  console.log(alertComponent)
-  const [acordionOpen, __acordionOpen] = useState<any>(true)
+  const [acordionOpen, __acordionOpen] = useState<any>(true);
   const list = products.map((item) => (
     <ProductsWrapper
       openAcordion={__acordionOpen}
@@ -24,9 +23,9 @@ export default function Products({
       notification={notification}
       alertComponent={alertComponent}
     />
-  ))
+  ));
 
-  const ids = useMemo(() => products.map(p => p.id), [products])
+  const ids = useMemo(() => products.map((p) => p.id), [products]);
 
   return (
     <Accordion
@@ -40,5 +39,5 @@ export default function Products({
     >
       {list}
     </Accordion>
-  )
+  );
 }

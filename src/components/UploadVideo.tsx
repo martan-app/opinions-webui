@@ -66,7 +66,7 @@ export function UploadVideo(props: Partial<Props>) {
         }}
       >
         <FileInput
-          size="xl"
+          size="lg"
           sx={{
             width: "100%",
           }}
@@ -76,9 +76,9 @@ export function UploadVideo(props: Partial<Props>) {
             __file(file);
             typeof onReady === "function" && onReady(file);
           }}
-          placeholder="Escolher um video"
-          label="Video"
-          description="Gostou do produto? Por que não envia um video?"
+          placeholder="Escolher um vídeo"
+          label="Vídeo"
+          description="Gostou do produto? Por que não envia um vídeo?"
         />
       </Flex>
 

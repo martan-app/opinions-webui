@@ -1,45 +1,45 @@
-import { Box, Button, Flex, Text } from "@mantine/core"
-import { useContext, useEffect, useRef, useState } from "react"
-import { Logo } from "../components/Logo"
-import Products from "../components/Products"
+import { Box, Button, Flex, Text } from "@mantine/core";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Logo } from "../components/Logo";
+import Products from "../components/Products";
 import NotificationsComponent, {
   NotificationsHandle,
-} from "../components/notifications"
-import { AuthorContext } from "./../context/notification"
-import { getServerSideProps } from "../server-side-props/reviews"
+} from "../components/notifications";
+import { AuthorContext } from "./../context/notification";
+import { getServerSideProps } from "../server-side-props/reviews";
 
 export default function Home(props: any) {
-  const { __author } = useContext<any>(AuthorContext)
-  const { notification, decodedToken } = props
-  const $alert = useRef<NotificationsHandle>(null)
-  const [show, __show] = useState(false)
+  const { __author } = useContext<any>(AuthorContext);
+  const { notification, decodedToken } = props;
+  const $alert = useRef<NotificationsHandle>(null);
+  const [show, __show] = useState(false);
 
   function renderButton() {
     if (!notification?.stores?.url) {
-      return null
+      return null;
     }
 
     return (
       <a target="_blank" href={notification.stores.url} rel="noreferrer">
         <Button>Acessar site</Button>
       </a>
-    )
+    );
   }
 
   useEffect(() => {
     setTimeout(() => {
-      __show(true)
-    }, 100)
-  }, [])
+      __show(true);
+    }, 100);
+  }, []);
 
   useEffect(() => {
-    __author(notification?.customers?.name)
-  }, [__author, notification?.customers?.name])
+    __author(notification?.customers?.name);
+  }, [__author, notification?.customers?.name]);
 
   if (!notification || !decodedToken || !show) {
-    return null
+    return null;
   }
-
+  
   return (
     <Box
       sx={{
@@ -64,9 +64,11 @@ export default function Home(props: any) {
           <Logo src={notification.stores.logo_url} />
         )}
 
-        <Text span p="xl" align="center">
-          Sua avaliação é fundamental e pode ajudar outros Clientes a saberem
-          mais sobre a o produto.
+        <Text p="xl" align="center">
+          {notification?.productBody?.length > 1
+            ? "O que achou dos produtos?"
+            : "O que achou do produto?"}{" "}
+          Outras pessoas já avaliaram.
         </Text>
 
         <Products
@@ -75,12 +77,12 @@ export default function Home(props: any) {
           alertComponent={$alert?.current}
         />
 
-        <Text span p="xl" align="center">
+        {/* <Text span p="xl" align="center">
           Você pode cancelar o recebimento dos comunicados relacionados as
           avaliações nos e-mails enviados.
-        </Text>
+        </Text> */}
 
-        {renderButton()}
+        {/* {renderButton()} */}
 
         <Text span p="xl" align="center">
           © {new Date().getFullYear()} {notification?.stores?.name}. Todos os
@@ -90,7 +92,7 @@ export default function Home(props: any) {
 
       <NotificationsComponent ref={$alert} />
     </Box>
-  )
+  );
 }
 
-export { getServerSideProps }
+export { getServerSideProps };

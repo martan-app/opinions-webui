@@ -22,11 +22,11 @@ export default function Author({ onChange }: Props) {
     <>
       <Box mb="xl">
         <Menu shadow="md">
-          <Text fz="lg" fw={500}>
+          {/* <Text fz="lg" fw={500}>
             Autor
-          </Text>
+          </Text> */}
 
-          <Text fz="sm" c="dimmed">
+          <Text align="right" fz="sm" c="dimmed">
             Publicar como{" "}
             <span style={{ textTransform: "capitalize" }}>{author}</span>{" "}
             <Menu.Target>
