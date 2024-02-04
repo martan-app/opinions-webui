@@ -18,7 +18,8 @@ interface ProductsProps {
   openAcordion: any;
 }
 
-export default function ProductsWrapper({
+export default function 
+ProductsWrapper({
   product,
   notification,
   alertComponent,
@@ -228,7 +229,7 @@ export default function ProductsWrapper({
           image={getPictureUrl()}
           ref={$rating}
           onRating={(value) => {
-            CreateOrUpdateWithRating(value);
+            // CreateOrUpdateWithRating(value);
           }}
           hasReview={hasReview}
         />

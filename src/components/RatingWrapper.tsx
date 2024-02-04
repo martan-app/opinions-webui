@@ -81,7 +81,10 @@ const RatingWrapper: ForwardRefRenderFunction<
         <Rating
           value={rating}
           // itemStyles={customStyles}
-          onChange={__rating}
+          onChange={(value: any) => {
+            __rating(value)
+            typeof onRating === 'function' && onRating(value)
+          }}
           visibleLabelId={CUSTOM_GROUP_LABEL_ID}
           invisibleItemLabels={CUSTOM_ITEM_LABELS}
           spaceBetween="small"

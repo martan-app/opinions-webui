@@ -14,18 +14,6 @@ export default function Home(props: any) {
   const $alert = useRef<NotificationsHandle>(null);
   const [show, __show] = useState(false);
 
-  function renderButton() {
-    if (!notification?.stores?.url) {
-      return null;
-    }
-
-    return (
-      <a target="_blank" href={notification.stores.url} rel="noreferrer">
-        <Button>Acessar site</Button>
-      </a>
-    );
-  }
-
   useEffect(() => {
     setTimeout(() => {
       __show(true);
@@ -76,13 +64,6 @@ export default function Home(props: any) {
           notification={notification}
           alertComponent={$alert?.current}
         />
-
-        {/* <Text span p="xl" align="center">
-          Você pode cancelar o recebimento dos comunicados relacionados as
-          avaliações nos e-mails enviados.
-        </Text> */}
-
-        {/* {renderButton()} */}
 
         <Text span p="xl" align="center">
           © {new Date().getFullYear()} {notification?.stores?.name}. Todos os

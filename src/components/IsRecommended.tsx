@@ -7,6 +7,7 @@ import { IconThumbDown, IconThumbUp } from "@tabler/icons-react";
 import {
   ForwardRefRenderFunction,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useState,
 } from "react";
@@ -32,6 +33,12 @@ const IsRecommended: ForwardRefRenderFunction<
     }),
     setValue: (value) => setValue(value),
   }));
+
+  useEffect(() => {
+    typeof onChange === 'function' && onChange({
+      is_recommended: value === "sim"
+    })
+  }, [onChange, value])
 
   return (
     // <Radio.Group
@@ -73,7 +80,7 @@ const IsRecommended: ForwardRefRenderFunction<
           size="lg"
           variant={value === "sim" ? "filled" : "outline"}
           style={{
-            maxWidth:'150px',
+            maxWidth:'130px',
             width: '100%'
           }}
           leftIcon={<IconThumbUp />}
@@ -86,7 +93,7 @@ const IsRecommended: ForwardRefRenderFunction<
           color="red"
           size="lg"
           variant={value === "nao" ? "filled" : "outline"}style={{
-            maxWidth:'150px',
+            maxWidth:'130px',
             width: '100%'
           }}
           leftIcon={<IconThumbDown />}
