@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import supabase from "../../utils/supabase-client";
 import sinitizer from "string-sanitizer";
 import { log } from "@logtail/next";
+import { displayName } from "../../utils/display-name";
 
 type Data = any;
 
@@ -31,6 +32,10 @@ export default async function handler(
         payload[prop] = sinitizer.sanitize.keepUnicode(body[prop]);
       }
     });
+
+    if (payload.author) {
+      payload.display_name = displayName(payload.author)
+    }
 
     const { data, error } = await supabase
       .from("reviews")

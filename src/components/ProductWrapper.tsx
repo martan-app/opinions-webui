@@ -18,8 +18,7 @@ interface ProductsProps {
   openAcordion: any;
 }
 
-export default function 
-ProductsWrapper({
+export default function ProductsWrapper({
   product,
   notification,
   alertComponent,
@@ -200,17 +199,16 @@ ProductsWrapper({
   }
 
   function CreateOrUpdateWithIsRecommended(value: boolean) {
-    if (reviewId) {
+    if (reviewId && $ratingWrapper?.current?.getRating() > 0) {
       updateReview({
         is_recommended: value,
         rating: $ratingWrapper?.current?.getRating(),
       });
-    } else {
-      $ratingWrapper?.current?.getRating() > 0 &&
-        createReview({
-          is_recommended: value,
-          rating: $ratingWrapper?.current?.getRating(),
-        });
+    } else if ($ratingWrapper?.current?.getRating() > 0) {
+      createReview({
+        is_recommended: value,
+        rating: $ratingWrapper?.current?.getRating(),
+      });
     }
   }
 
