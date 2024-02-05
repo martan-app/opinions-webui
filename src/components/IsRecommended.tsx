@@ -1,8 +1,4 @@
-import {
-  Button,
-  Group,
-  Text
-} from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import { IconThumbDown, IconThumbUp } from "@tabler/icons-react";
 import {
   ForwardRefRenderFunction,
@@ -34,11 +30,11 @@ const IsRecommended: ForwardRefRenderFunction<
     setValue: (value) => setValue(value),
   }));
 
-  useEffect(() => {
-    typeof onChange === 'function' && onChange({
-      is_recommended: value === "sim"
-    })
-  }, [onChange, value])
+  // useEffect(() => {
+  //   typeof onChange === 'function' && onChange({
+  //     is_recommended: value === "sim"
+  //   })
+  // }, [onChange, value])
 
   return (
     // <Radio.Group
@@ -64,24 +60,34 @@ const IsRecommended: ForwardRefRenderFunction<
     <Group
       style={{
         flexDirection: "column",
-        marginBottom: '3rem'
+        marginBottom: "3rem",
       }}
     >
       <Text size="xl" fw={500} align="center">
         Você recomendaria esse produto
       </Text>
 
-      <Group w="100%" align="center" sx={{
-        justifyContent: 'center'
-      }}>
+      <Group
+        w="100%"
+        align="center"
+        sx={{
+          justifyContent: "center",
+        }}
+      >
         <Button
-          onClick={() => setValue("sim")}
+          onClick={() => {
+            typeof onChange === "function" &&
+              onChange({
+                is_recommended: true,
+              });
+            setValue("sim");
+          }}
           color="green"
           size="lg"
           variant={value === "sim" ? "filled" : "outline"}
           style={{
-            maxWidth:'130px',
-            width: '100%'
+            maxWidth: "130px",
+            width: "100%",
           }}
           leftIcon={<IconThumbUp />}
         >
@@ -89,15 +95,21 @@ const IsRecommended: ForwardRefRenderFunction<
         </Button>
 
         <Button
-          onClick={() => setValue("nao")}
+          onClick={() => {
+            setValue("nao");
+            typeof onChange === "function" &&
+              onChange({
+                is_recommended: false,
+              });
+          }}
           color="red"
           size="lg"
-          variant={value === "nao" ? "filled" : "outline"}style={{
-            maxWidth:'130px',
-            width: '100%'
+          variant={value === "nao" ? "filled" : "outline"}
+          style={{
+            maxWidth: "130px",
+            width: "100%",
           }}
           leftIcon={<IconThumbDown />}
-
         >
           Não
         </Button>
