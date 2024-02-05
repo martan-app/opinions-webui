@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import supabase from "./../../../../utils/supabase-client";
 import { log } from "@logtail/next";
+import { displayName } from "../../../../utils/display-name";
 
 type Data = any;
 
@@ -11,6 +12,10 @@ export default async function handler(
 ) {
   if (req.method === "PATCH") {
     const { body, query } = req;
+    const payload = body
+    if (payload.author) {
+      payload.display_name = displayName(payload.author)
+    }
     const { error } = await supabase
       .from("reviews")
       .update([body])
