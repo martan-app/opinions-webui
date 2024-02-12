@@ -78,7 +78,7 @@ export function UploadVideo(props: Partial<Props>) {
           }}
           placeholder="Escolher um vídeo"
           label="Vídeo"
-          description="Gostou do produto? Por que não envia um vídeo?"
+          description="Por que não envia um vídeo?"
         />
       </Flex>
 

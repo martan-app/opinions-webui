@@ -18,10 +18,12 @@ import { UploadVideo } from "./UploadVideo";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
 import { NotificationsHandle } from "./notifications";
+import RatingWrapper from "./RatingWrapper";
 
 interface ProductsProps {
-  alertComponent: NotificationsHandle;
+  ratingRef: any;
   getRating: () => number;
+  onRating: (value: any) => void;
   storeId: number;
   notificationId: string;
   order: any;
@@ -37,7 +39,8 @@ interface ProductsProps {
 }
 
 export default function Form({
-  alertComponent,
+  onRating,
+  ratingRef,
   step,
   order,
   product,
@@ -78,7 +81,8 @@ export default function Form({
   });
 
   async function createReview(values: any) {
-    if (getRating() <= 0) {
+    const rating = getRating()
+    if (typeof rating !== 'number' || rating <= 0) {
       setErrorRating(true);
       return;
     }
@@ -232,7 +236,7 @@ export default function Form({
         return "Enviar vídeo";
       }
 
-      return "Publicar";
+      return "Publicar Avaliação";
     },
     [isLoading, step]
   );
@@ -276,7 +280,10 @@ export default function Form({
           />
 
           <Group position="right">
-            <Text c="gray"><strong>{70 - form?.values?.title?.length}</strong> caracteres restante</Text>
+            <Text c="gray">
+              <strong>{70 - form?.values?.title?.length}</strong> caracteres
+              restante
+            </Text>
           </Group>
         </Box>
 
@@ -297,17 +304,21 @@ export default function Form({
         )}
 
         {errorRating && (
-          <Alert
-            title="Escolha uma nota para o produto"
-            color="red"
-            withCloseButton
-            onClose={() => setErrorRating(false)}
-            variant="filled"
-            mb="md"
-          >
-            Escolha uma nota de 1 a 5 para o produto antes de enviar o
-            formulário.
-          </Alert>
+          <>
+            <RatingWrapper ref={ratingRef} onRating={onRating} />
+
+            <Alert
+              title="Escolha uma nota para o produto"
+              color="red"
+              withCloseButton
+              onClose={() => setErrorRating(false)}
+              variant="filled"
+              mb="md"
+            >
+              Escolha uma nota para o produto antes de enviar o
+              formulário.
+            </Alert>
+          </>
         )}
 
         <Author

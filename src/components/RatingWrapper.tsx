@@ -7,17 +7,17 @@ import {
   useState,
 } from "react";
 
-const CUSTOM_GROUP_LABEL = "O que achou do produto?";
+const CUSTOM_GROUP_LABEL = "Qual é a sua nota para este produto?";
 const CUSTOM_GROUP_LABEL_ID = "group_label";
 
-const CUSTOM_ITEM_LABELS = ["Ruim", "Fraco", "Médio", "Muito Bom", "Excelente"];
-const CUSTOM_ITEM_LABELS_IDS = [
-  "label_1",
-  "label_2",
-  "label_3",
-  "label_4",
-  "label_5",
+const CUSTOM_ITEM_LABELS = [
+  "Não gostei",
+  "Poderia ser melhor",
+  "Bom",
+  "Muito Bom",
+  "Excelente",
 ];
+const CUSTOM_ITEM_LABELS_IDS = [1, 2, 3, 4, 5];
 
 interface RatingProps {
   onRating?: (value: any) => void;
@@ -48,16 +48,16 @@ const RatingWrapper: ForwardRefRenderFunction<
       align="center"
       mb="xl"
       style={{
-        marginBottom: "2rem",
+        marginBottom: "3rem",
       }}
     >
-      <Text size="xl" fw={500}>
-        Escolha uma nota para o produto
+      <Text size="xl" mt="md" fw={500} align="center">
+        Qual é a sua nota para este produto?
       </Text>
 
       {rating <= 0 && (
-        <Text size="xs" c="gray">
-          Resposta obrigatório
+        <Text size="xs" mb="md" mt="md" c="gray">
+          Resposta obrigatória
         </Text>
       )}
       {/* <Group>
@@ -77,13 +77,13 @@ const RatingWrapper: ForwardRefRenderFunction<
         </Text>
       </Group> */}
 
-      <div role="group" style={{ maxWidth: 400, width: "100%" }}>
+      <div role="group">
         <Rating
           value={rating}
           // itemStyles={customStyles}
           onChange={(value: any) => {
-            __rating(value)
-            typeof onRating === 'function' && onRating(value)
+            __rating(value);
+            typeof onRating === "function" && onRating(value);
           }}
           visibleLabelId={CUSTOM_GROUP_LABEL_ID}
           invisibleItemLabels={CUSTOM_ITEM_LABELS}
@@ -92,6 +92,34 @@ const RatingWrapper: ForwardRefRenderFunction<
           transition="colors"
           isRequired
         />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            justifyItems: "center",
+          }}
+        >
+          {CUSTOM_ITEM_LABELS.map((label, index) => (
+            <span
+              onClick={() => {
+                __rating(CUSTOM_ITEM_LABELS_IDS[index]);
+                typeof onRating === "function" &&
+                  onRating(CUSTOM_ITEM_LABELS_IDS[index]);
+              }}
+              key={label}
+              id={"label_" + CUSTOM_ITEM_LABELS_IDS[index]}
+              style={{
+                opacity: index + 1 === rating ? 1 : 0.35,
+                textDecoration: index + 1 === rating ? "underline" : "inherit",
+                padding: "0 5%",
+                textAlign: "center",
+                cursor: 'pointer'
+              }}
+            >
+              <strong>{label}</strong>
+            </span>
+          ))}
+        </div>
       </div>
     </Flex>
   );

@@ -62,7 +62,6 @@ export default function Home(props: any) {
         <Products
           products={notification.productBody}
           notification={notification}
-          alertComponent={$alert?.current}
         />
 
         <Text span p="xl" align="center">
