@@ -224,15 +224,9 @@ export default function ProductsWrapper({
     <Card shadow="sm" mb="lg" p="lg" radius="md" withBorder key={product.label}>
       <Card.Section p="lg">
         <Product
-          openAcordion={() => {
-            openAcordion(product.id);
-          }}
           name={product.name}
           image={getPictureUrl()}
           ref={$rating}
-          onRating={(value) => {
-            // CreateOrUpdateWithRating(value);
-          }}
           hasReview={hasReview}
         />
       </Card.Section>

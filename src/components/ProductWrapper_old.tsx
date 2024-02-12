@@ -134,9 +134,9 @@ export default function ProductsWrapper({
   async function updateRating(rating: number) {
     const url = `/api/reviews/${reviewId}/review`;
     try {
-      await apiRequest(url, 'PATCH', rating)  
+      await apiRequest(url, "PATCH", rating);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
@@ -163,7 +163,7 @@ export default function ProductsWrapper({
     //   }),
     // });
     const url = "/api/reviews";
-    const req = await apiRequest(url, 'post', rating)
+    const req = await apiRequest(url, "post", rating);
     const res = await req.json();
 
     if (req.ok) {
@@ -188,17 +188,7 @@ export default function ProductsWrapper({
   return (
     <Card shadow="sm" mb="lg" p="lg" radius="md" withBorder key={product.label}>
       <Card.Section p="lg">
-        <Product
-          openAcordion={() => {
-            openAcordion(product.id);
-          }}
-          name={product.name}
-          image={getPictureUrl()}
-          ref={$rating}
-          onRating={(value) => {
-            CreateOrUpdate(value);
-          }}
-        />
+        <Product name={product.name} image={getPictureUrl()} ref={$rating} />
       </Card.Section>
 
       <Card.Section p="lg">
