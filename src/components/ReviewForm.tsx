@@ -29,11 +29,11 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   const [isLoading, __isLoading] = useState(false);
   const [step, __step] = useState<string>("review");
   const [reviewId, __reviewId] = useState<string | null>(null);
-
   const [hasReview, __hasReview] = useState(false);
+  const [errorRating, setErrorRating] = useState(false);
+
   const [body, __body] = useState("");
   const [title, __title] = useState("");
-  const [errorRating, setErrorRating] = useState(false);
   const [pictures, __pictures] = useState<any>(null);
   const [video, __video] = useState<any>(null);
 
@@ -42,7 +42,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   const $rating = useRef<ProductHandle>(null);
   const $ratingWrapper = useRef<RatingWrapperHandle>(null);
   const $isRecommendedRef = useRef<IsRecommendedHandle>(null);
-  // TODO: verificar isso aqui
+
   useEffect(() => {
     if (notification?.reviews?.length) {
       const reviews = notification.reviews.find(
@@ -183,6 +183,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       const res = await req.json();
       if (req.ok) {
         changeSteep && __step("media");
+        console.log(res);
+        __reviewId(res.id);
       } else if (!req.ok && req.status >= 400) {
         // onError(res);
       }
@@ -248,9 +250,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
     const promises = pictures?.map((file: File) =>
       UploadImageWithImgKit(file)
         .then((img) => listOfPictures.push(img))
-        .catch((err) => {
-          console.error(err);
-        })
+        .catch(console.error)
     );
 
     await Promise.all(promises);
@@ -295,17 +295,9 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         return "Enviando..";
       }
 
-      if (step === "picture") {
-        return "Enviar fotos";
-      }
-
-      if (step === "video") {
-        return "Enviar vídeo";
-      }
-
       return "Publicar Avaliação";
     },
-    [isLoading, step]
+    [isLoading]
   );
 
   return (
@@ -381,7 +373,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                submit().catch(console.error);
+                if (!isLoading) submit(true).catch(console.error);
               }}
               fullWidth
               size="lg"
