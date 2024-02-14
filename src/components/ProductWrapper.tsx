@@ -6,9 +6,7 @@ import Form from "./Form";
 import IsRecommended, { IsRecommendedHandle } from "./IsRecommended";
 import Product, { ProductHandle } from "./Product";
 import RatingWrapper, { RatingWrapperHandle } from "./RatingWrapper";
-import AppStepper, { StepperHandle } from "./Stepper";
-import { UploadImage } from "./UploadImage";
-import { UploadVideo } from "./UploadVideo";
+import { StepperHandle } from "./Stepper";
 import { NotificationsHandle } from "./notifications";
 
 interface ProductsProps {
@@ -185,15 +183,21 @@ export default function ProductsWrapper({
   }
 
   function CreateOrUpdateWithRating(value: number) {
+    let IsRecommended = $isRecommendedRef?.current?.getValue();
+    if (!IsRecommended) {
+      IsRecommended = true;
+    } else {
+      IsRecommended = IsRecommended === "sim";
+    }
     if (reviewId) {
       updateReview({
         rating: value,
-        is_recommended: $isRecommendedRef?.current?.getValue().is_recommended,
+        is_recommended: IsRecommended,
       });
     } else {
       createReview({
         rating: value,
-        is_recommended: $isRecommendedRef?.current?.getValue().is_recommended,
+        is_recommended: IsRecommended,
       });
     }
   }
@@ -220,15 +224,9 @@ export default function ProductsWrapper({
     <Card shadow="sm" mb="lg" p="lg" radius="md" withBorder key={product.label}>
       <Card.Section p="lg">
         <Product
-          openAcordion={() => {
-            openAcordion(product.id);
-          }}
           name={product.name}
           image={getPictureUrl()}
           ref={$rating}
-          onRating={(value) => {
-            // CreateOrUpdateWithRating(value);
-          }}
           hasReview={hasReview}
         />
       </Card.Section>
@@ -251,11 +249,12 @@ export default function ProductsWrapper({
             <IsRecommended
               ref={$isRecommendedRef}
               onChange={(value) => {
-                CreateOrUpdateWithIsRecommended(value.is_recommended);
+                CreateOrUpdateWithIsRecommended(value === "sim");
               }}
             />
 
             <FormMemo
+              ratingRef={$ratingWrapper}
               alertComponent={alertComponent}
               store={notification.stores}
               reviewId={reviewId}
@@ -266,6 +265,10 @@ export default function ProductsWrapper({
               storeId={notification.store_id}
               product={product}
               order={notification.order_id}
+              onRating={(value: any) => {
+                CreateOrUpdateWithRating(value);
+                $ratingWrapper.current?.setRating(value);
+              }}
               onSave={({ id }: any): void => {
                 onCreateReview(id);
               }}

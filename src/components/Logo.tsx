@@ -5,5 +5,5 @@ type Props = {
 }
 
 export const Logo = ({ src }: Props) => (
-  <Image src={src} fit="cover" width="120px" alt="Logo" />
+  <Image src={src} fit="cover" maw="200px" alt="Logo" />
 )

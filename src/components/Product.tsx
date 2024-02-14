@@ -9,8 +9,6 @@ import {
 interface ProductProps {
   name: string;
   image?: string;
-  openAcordion?: any;
-  onRating?: (value: any) => void;
   hasReview?: boolean;
 }
 
@@ -21,7 +19,7 @@ export type ProductHandle = {
 };
 
 const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
-  { name, image, openAcordion, onRating, hasReview },
+  { name, image, hasReview },
   ref
 ) => {
   const [rating, __rating] = useState(0);
@@ -70,6 +68,7 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         >
           {name}
         </Text>
+        
         {hasReview && (
           <Text size="sm" color="dimmed" weight={400}>
             <Rating
