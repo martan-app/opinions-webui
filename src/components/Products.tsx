@@ -1,43 +1,16 @@
-import { Accordion } from "@mantine/core";
-import ProductsWrapper from "./ProductWrapper";
-import { NotificationsHandle } from "./notifications";
-import { useMemo, useState } from "react";
+import ReviewForm from "./ReviewForm";
 
 interface ProductsProps {
   products: any[];
   notification: any;
-  alertComponent?: NotificationsHandle | null;
 }
 
-export default function Products({
-  products,
-  notification,
-  alertComponent,
-}: ProductsProps) {
-  const [acordionOpen, __acordionOpen] = useState<any>(true);
-  const list = products.map((item) => (
-    <ProductsWrapper
-      openAcordion={__acordionOpen}
-      key={item.id}
-      product={item}
-      notification={notification}
-      alertComponent={alertComponent}
-    />
-  ));
-
-  const ids = useMemo(() => products.map((p) => p.id), [products]);
-
+export default function Products({ products, notification }: ProductsProps) {
   return (
-    <Accordion
-      onChange={__acordionOpen}
-      value={acordionOpen}
-      p="sm"
-      chevronPosition="right"
-      variant="separated"
-      multiple={true}
-      defaultValue={ids}
-    >
-      {list}
-    </Accordion>
+    <>
+      {products.map((item) => (
+        <ReviewForm key={item.id} product={item} notification={notification} />
+      ))}
+    </>
   );
 }

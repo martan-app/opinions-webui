@@ -21,12 +21,10 @@ const IsRecommended: ForwardRefRenderFunction<
   IsRecommendedHandle,
   RecommendedProps
 > = ({ onChange }, ref) => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState<string>("");
 
   useImperativeHandle(ref, () => ({
-    getValue: () => ({
-      is_recommended: value === "sim",
-    }),
+    getValue: () => value,
     setValue: (value) => setValue(value),
   }));
 
@@ -61,6 +59,7 @@ const IsRecommended: ForwardRefRenderFunction<
       style={{
         flexDirection: "column",
         marginBottom: "3rem",
+        marginTop: "3rem",
       }}
     >
       <Text size="xl" fw={500} align="center">
@@ -76,10 +75,7 @@ const IsRecommended: ForwardRefRenderFunction<
       >
         <Button
           onClick={() => {
-            typeof onChange === "function" &&
-              onChange({
-                is_recommended: true,
-              });
+            typeof onChange === "function" && onChange("sim");
             setValue("sim");
           }}
           color="green"
@@ -97,10 +93,7 @@ const IsRecommended: ForwardRefRenderFunction<
         <Button
           onClick={() => {
             setValue("nao");
-            typeof onChange === "function" &&
-              onChange({
-                is_recommended: false,
-              });
+            typeof onChange === "function" && onChange("nao");
           }}
           color="red"
           size="lg"

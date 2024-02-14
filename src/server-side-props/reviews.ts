@@ -81,6 +81,9 @@ export async function getServerSideProps(context: any) {
       }
     }
 
+    delete notificationBody.token
+    delete notificationBody.orders
+
     return {
       props: {
         notification: notificationBody,
