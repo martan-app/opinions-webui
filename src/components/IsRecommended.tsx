@@ -59,6 +59,7 @@ const IsRecommended: ForwardRefRenderFunction<
       style={{
         flexDirection: "column",
         marginBottom: "3rem",
+        marginTop: "3rem",
       }}
     >
       <Text size="xl" fw={500} align="center">

@@ -324,6 +324,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
               CreateOrUpdateWithRating(value);
               setErrorRating(false);
             }}
+            isError={errorRating}
           />
 
           {errorRating && (

@@ -11,16 +11,17 @@ const CUSTOM_GROUP_LABEL = "Qual é a sua nota para este produto?";
 const CUSTOM_GROUP_LABEL_ID = "group_label";
 
 const CUSTOM_ITEM_LABELS = [
-  "Não gostei",
-  "Poderia ser melhor",
+  "Muito ruim",
+  "Ruim",
+  "Pode ser melhor",
   "Bom",
-  "Muito Bom",
-  "Excelente",
+  "Ótimo",
 ];
 const CUSTOM_ITEM_LABELS_IDS = [1, 2, 3, 4, 5];
 
 interface RatingProps {
   onRating?: (value: any) => void;
+  isError?: boolean;
 }
 
 export type RatingWrapperHandle = {
@@ -32,7 +33,7 @@ export type RatingWrapperHandle = {
 const RatingWrapper: ForwardRefRenderFunction<
   RatingWrapperHandle,
   RatingProps
-> = ({ onRating }, ref) => {
+> = ({ onRating, isError }, ref) => {
   const [rating, __rating] = useState(0);
   const [isReadOnly, __isReadOnly] = useState(false);
 
@@ -43,14 +44,7 @@ const RatingWrapper: ForwardRefRenderFunction<
   }));
 
   return (
-    <Flex
-      direction="column"
-      align="center"
-      mb="xl"
-      style={{
-        marginBottom: "3rem",
-      }}
-    >
+    <Flex direction="column" align="center">
       <Text size="xl" mt="md" fw={500} align="center">
         Qual é a sua nota para este produto?
       </Text>
@@ -108,13 +102,26 @@ const RatingWrapper: ForwardRefRenderFunction<
               }}
               key={label}
               id={"label_" + CUSTOM_ITEM_LABELS_IDS[index]}
-              style={{
-                opacity: index + 1 === rating ? 1 : 0.35,
-                textDecoration: index + 1 === rating ? "underline" : "inherit",
-                padding: "0 5%",
-                textAlign: "center",
-                cursor: 'pointer'
-              }}
+              style={
+                !isError
+                  ? {
+                      opacity: index + 1 === rating ? 1 : 0.35,
+                      textDecoration:
+                        index + 1 === rating ? "underline" : "inherit",
+                      padding: "0 5%",
+                      textAlign: "center",
+                      cursor: "pointer",
+                    }
+                  : {
+                      // opacity: index + 1 === rating ? 1 : 0.35,
+                      textDecoration: 1,
+                      // fontWeight: 'bold',
+                      padding: "0 5%",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      color: "red",
+                    }
+              }
             >
               <strong>{label}</strong>
             </span>
