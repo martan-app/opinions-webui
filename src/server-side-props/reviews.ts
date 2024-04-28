@@ -22,19 +22,18 @@ export async function getServerSideProps(context: any) {
       .from("notifications")
       .select(
         `
-      id,
-      orders(id, order_id, products),
-      customers(name, id),
-      stores(name, url, logo_url,is_enable_video,is_enable_pictures),
-      order_id,
-      store_id,
-      status,
-      token,
-      reviews
-    `
+          id,
+          orders(id, order_id, products),
+          customers(name, id),
+          stores(name, url, logo_url,is_enable_video,is_enable_pictures,required_review_when_rating_is_less_than),
+          order_id,
+          store_id,
+          status,
+          token,
+          reviews
+        `
       )
       .eq("id", query.notification);
-
     if (notErr || !data.length) {
       return {
         redirect: {
