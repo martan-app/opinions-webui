@@ -1,10 +1,12 @@
 /* eslint-disable react/display-name */
 import {
   Alert,
+  Box,
   Button,
   Card,
   Flex,
   Group,
+  LoadingOverlay,
   Text,
   TextInput,
   Textarea,
@@ -31,6 +33,9 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   const [reviewId, __reviewId] = useState<string | null>(null);
   const [hasReview, __hasReview] = useState(false);
   const [errorRating, setErrorRating] = useState(false);
+
+  const [isRecommendedAux, setIsRecommendedAux] = useState<any>(null);
+  const [ratingAux, setRatingAux] = useState<any>(null);
 
   const [body, __body] = useState("");
   const [title, __title] = useState("");
@@ -67,6 +72,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   function CreateOrUpdateWithRating(value: number) {
+    setRatingAux(value);
     let IsRecommended = $isRecommendedRef?.current?.getValue();
     if (!IsRecommended) {
       IsRecommended = true;
@@ -86,6 +92,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   function CreateOrUpdateWithIsRecommended(value: boolean) {
+    setIsRecommendedAux(value);
     if (reviewId && $ratingWrapper?.current?.getRating() > 0) {
       updateReview({
         is_recommended: value,
@@ -183,7 +190,6 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       const res = await req.json();
       if (req.ok) {
         changeSteep && __step("media");
-        console.log(res);
         __reviewId(res.id);
       } else if (!req.ok && req.status >= 400) {
         // onError(res);
@@ -348,11 +354,24 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           />
 
           <Textarea
-            placeholder="Exemplo; foi facil a montagem, bem acabado, etc e tal."
+            // placeholder="Pode ser curto tipo; fácil montagem, bem acabado, ótima embalagem de entrega, etc :)"
+            placeholder={
+              (typeof isRecommendedAux === "boolean" &&
+                isRecommendedAux === false) ||
+              (ratingAux && ratingAux <= 3)
+                ? ""
+                : "Pode ser curto tipo; fácil montagem, bem acabado, ótima embalagem de entrega, etc :)"
+            }
             label="Conte o que você achou do produto"
             // description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
             description=" "
-            // error="Verifique o campo"
+            error={
+              (typeof isRecommendedAux === "boolean" &&
+                isRecommendedAux === false) ||
+              (ratingAux && ratingAux <= 3)
+                ? "Por favor, compartilhe conosco o porquê da nota escolhida para que possamos aprimorar nossos produtos e serviços."
+                : null
+            }
             size="lg"
             mb="xl"
             autosize
@@ -397,6 +416,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
             display: step === "media" ? "block" : "none",
           }}
         >
+          <LoadingOverlay visible={isLoading} zIndex={1000} overlayBlur={2} />
+
           <TextInput
             placeholder="Resuma sua avaliação em poucas palavras"
             label="Mais algum ponto que devemos saber?"

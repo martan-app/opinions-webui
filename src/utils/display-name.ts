@@ -18,7 +18,3 @@ export function displayName(name: string) {
 
   return null
 }
-
-// const name = 'talisson jose ferreira da trindade' // Try edit me
-// const transformed = displayName(name)
-// console.log(transformed)
