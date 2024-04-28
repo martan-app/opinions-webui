@@ -7,6 +7,7 @@ import NotificationsComponent, {
 } from "../components/notifications";
 import { AuthorContext } from "./../context/notification";
 import { getServerSideProps } from "../server-side-props/reviews";
+import { LogoMartan } from "../components/LogoMartan";
 
 export default function Home(props: any) {
   const { __author } = useContext<any>(AuthorContext);
@@ -38,7 +39,7 @@ export default function Home(props: any) {
         sx={{
           maxWidth: "590px",
           width: "100%",
-          margin: "50px auto",
+          margin: "25px auto",
           //background: "#fff",
         }}
         mih={50}
@@ -69,6 +70,8 @@ export default function Home(props: any) {
           direitos reservados.
         </Text>
       </Flex>
+
+      <LogoMartan />
 
       <NotificationsComponent ref={$alert} />
     </Box>
