@@ -90,7 +90,7 @@ export async function getServerSideProps(context: any) {
       return {
         redirect: {
           permanent: false,
-          destination: "/error?reason=1801&e" + error.toString(),
+          destination: "/error?reason=1801&e=" + JSON.stringify(error),
         },
       };
     }
