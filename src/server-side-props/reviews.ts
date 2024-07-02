@@ -1,3 +1,4 @@
+import { log } from "@logtail/next";
 import { verify } from "jsonwebtoken";
 
 export async function getServerSideProps(context: any) {
@@ -24,10 +25,15 @@ export async function getServerSideProps(context: any) {
       );
 
       const req = await fetch(urlReviews.toString(), reqOptions);
-      console.log({ req });
+
       const res: any = await req.json();
 
       if (!req.ok) {
+        log.error("Opinions-Webui: Notifications Resquest Failed", {
+          erroCode: 1799,
+          req,
+          res,
+        });
         return {
           redirect: {
             permanent: false,
@@ -37,6 +43,11 @@ export async function getServerSideProps(context: any) {
       }
 
       if (decodedToken.store_id !== res.notification.store_id) {
+        log.error("Opinions-Webui: storeId diferente from token", {
+          erroCode: 1800,
+          res,
+          decodedToken,
+        });
         return {
           redirect: {
             permanent: false,
@@ -72,7 +83,10 @@ export async function getServerSideProps(context: any) {
         },
       };
     } catch (error: any) {
-      console.log("Errorrsfijoifjiosdifjoidsjoifjisjdoifjo", { error });
+      log.error("Opinions-Webui: request failed", {
+        erroCode: 1801,
+        error,
+      });
       return {
         redirect: {
           permanent: false,
