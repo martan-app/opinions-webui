@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Button, FileInput, Flex } from "@mantine/core";
+import { FileInput, Flex } from "@mantine/core";
 
 import { useState } from "react";
 import imagekit from "./../utils/imagekit-client";
@@ -80,49 +80,6 @@ export function UploadVideo(props: Partial<Props>) {
           label="Vídeo"
           description="Por que não envia um vídeo?"
         />
-      </Flex>
-
-      <Flex
-        gap="md"
-        justify={!hasVideo ? "space-between" : "flex-end"}
-        align="center"
-        direction="row"
-        wrap="wrap-reverse"
-        mt="md"
-      >
-        {/* {!hasVideo && (
-          <Button
-            disabled={isLoading}
-            variant="light"
-            onClick={() => {
-              if (onSkip) {
-                onSkip("pictures")
-              }
-            }}
-          >
-            Voltar
-          </Button>
-        )} */}
-
-        {/* <Flex gap={10}>
-          <Button
-            disabled={isLoading}
-            variant="outline"
-            onClick={() => {
-              if (onSkip) {
-                onSkip()
-              }
-            }}
-          >
-            Pular etapa
-          </Button>
-
-          <Button disabled={isLoading} onClick={() => {
-            upload().catch(console.error)
-          }}>
-            {isLoading ? "Enviando.." : "Enviar"}
-          </Button>
-        </Flex> */}
       </Flex>
     </Flex>
   );

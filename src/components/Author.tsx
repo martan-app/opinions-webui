@@ -1,8 +1,8 @@
 import { Box, Button, Menu, Text, TextInput } from "@mantine/core";
 import { useContext, useState } from "react";
 import sinitizer from "string-sanitizer";
-import { AuthorContext } from "./../context/notification";
 import { displayName } from "../utils/display-name";
+import { AuthorContext } from "./../context/notification";
 
 interface Props {
   onChange: (author: string) => void;
@@ -11,21 +11,19 @@ interface Props {
 export default function Author({ onChange }: Props) {
   const { author, __author } = useContext<any>(AuthorContext);
   const [newAuthor, __newAuthor] = useState("");
+  const [opened, setOpened] = useState(false);
 
   function saveAuthor() {
     if (newAuthor) {
       __author(sinitizer.sanitize.keepUnicode(newAuthor));
       onChange(newAuthor);
+      setOpened(false);
     }
   }
 
   return (
     <Box mb="xl">
-      <Menu shadow="md">
-        {/* <Text fz="lg" fw={500}>
-            Autor
-          </Text> */}
-
+      <Menu shadow="md" opened={opened} onChange={setOpened}>
         <Text align="right" fz="sm" c="dimmed">
           Publicar como{" "}
           <span style={{ textTransform: "capitalize" }}>

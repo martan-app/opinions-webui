@@ -1,7 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
-import supabase from "../../../../utils/supabase-client";
 import { log } from "@logtail/next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = any;
 
@@ -9,21 +8,44 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.ALLOWED_ORIGINS ?? "*"
+  );
   if (req.method === "PATCH") {
-    const { body, query } = req;
-    const { error } = await supabase
-      .from("reviews")
-      .update([
-        {
-          pictures: body,
-        },
-      ])
-      .eq("id", query.reviewId);
+    const { body, query, headers } = req;
 
-    if (!error) {
-      log.info("Fotos adicionada com sucesso a avaliacao!", { body, query });
-      res.status(204).end();
-    } else {
+    const storeId = headers["x-store-id"];
+    const token = headers["x-token"];
+
+    const urlReviews = new URL(
+      "/v1/reviews/" + query.reviewId,
+      process.env.CORE_API
+    );
+
+    const options: any = {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        "X-Store-Id": storeId,
+        "X-Token": token,
+      },
+      body: JSON.stringify({
+        pictures: body,
+      }),
+    };
+
+    try {
+      const response = await fetch(urlReviews, options);
+      if (response.ok) {
+        log.info("Fotos adicionada com sucesso a avaliacao!", {
+          body,
+          query,
+          response,
+        });
+        res.status(204).end();
+      }
+    } catch (error) {
       log.error("Erro ao adicionar as fotos na avaliacao", {
         body,
         error,

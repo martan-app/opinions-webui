@@ -2,7 +2,7 @@ import { Anchor, Flex, Image, Text } from "@mantine/core";
 
 export const LogoMartan = () => (
   <Flex align="center" justify="center">
-    <Text size="xs" c="dimmed">
+    <Text fw="normal" italic size="xs" c="dimmed">
       Powered by
     </Text>
 

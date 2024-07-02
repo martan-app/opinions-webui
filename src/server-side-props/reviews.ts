@@ -1,5 +1,4 @@
 import { verify } from "jsonwebtoken";
-import supabase from "../utils/supabase-client";
 
 export async function getServerSideProps(context: any) {
   const { query } = context;
@@ -9,92 +8,84 @@ export async function getServerSideProps(context: any) {
   if (query.t && query.notification) {
     try {
       decodedToken = verify(query.t || "", token);
-    } catch (error) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-valid?reason=expired",
-        },
+      const headers = new Headers();
+      headers.append("X-Store-Id", decodedToken.store_id);
+      headers.append("X-Token", query.t);
+      headers.append("Content-Type", "application/json");
+
+      const reqOptions = {
+        method: "get",
+        headers,
       };
-    }
 
-    const { data, error: notErr } = await supabase
-      .from("notifications")
-      .select(
-        `
-          id,
-          orders(id, order_id, products),
-          customers(name, id),
-          stores(name, url, logo_url,is_enable_video,is_enable_pictures,required_review_when_rating_is_less_than),
-          order_id,
-          store_id,
-          status,
-          token,
-          reviews
-        `
-      )
-      .eq("id", query.notification);
-    if (notErr || !data.length) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-found",
-        },
-      };
-    }
+      const urlReviews = new URL(
+        "/v1/notifications/" + query.notification,
+        process.env.CORE_API
+      );
 
-    if (
-      decodedToken.store_id !== data[0].store_id ||
-      query.t !== data[0].token
-    ) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-valid?reason=storeId,token",
-        },
-      };
-    }
+      const req = await fetch(urlReviews.toString(), reqOptions);
+      console.log({ req });
+      const res: any = await req.json();
 
-    const notificationBody: any = data[0];
-
-    if (notificationBody) {
-      const { data: products } = await supabase
-        .from("products")
-        .select("id, name, sku, url, pictures, product_id")
-        .in("id", notificationBody.orders.products);
-
-      if (products) {
-        notificationBody.productBody = products;
+      if (!req.ok) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: "/error?reason=1799",
+          },
+        };
       }
 
-      // reviews
-      if (notificationBody?.reviews?.length) {
-        const { data: reviews } = await supabase
-          .from("reviews")
-          .select("id, product_id, status, rating")
-          .in("id", notificationBody.reviews);
+      if (decodedToken.store_id !== res.notification.store_id) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: "/error?reason=1800",
+          },
+        };
+      }
 
-        if (reviews && reviews.length > 0) {
-          notificationBody.reviews = reviews;
+      let notificationBody: any = {
+        store_id: parseInt(decodedToken.store_id, 10),
+        id: query.notification,
+        order_ref: decodedToken.order_id,
+        order_id: decodedToken.order_id,
+      };
+
+      if (res.notification) {
+        if (res?.order?.products) {
+          notificationBody.productBody = res.order.products;
         }
+
+        if (res?.reviews) {
+          notificationBody.reviews = res.reviews;
+        }
+
+        notificationBody.stores = res.store;
+        notificationBody.customers = res.customer;
       }
+
+      return {
+        props: {
+          notification: notificationBody,
+          decodedToken,
+        },
+      };
+    } catch (error: any) {
+      console.log("Errorrsfijoifjiosdifjoidsjoifjisjdoifjo", { error });
+      return {
+        redirect: {
+          permanent: false,
+          destination: "/error?reason=1801&e" + error.toString(),
+        },
+      };
     }
-
-    delete notificationBody.token
-    delete notificationBody.orders
-
-    return {
-      props: {
-        notification: notificationBody,
-        decodedToken,
-      },
-    };
   }
 
   return {
     redirect: {
       permanent: false,
-      destination: "/not-found",
+      destination: "/error?reason=1802",
     },
   };
 }

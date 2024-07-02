@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import supabase from "../../utils/supabase-client";
-import sinitizer from "string-sanitizer";
 import { log } from "@logtail/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+import sinitizer from "string-sanitizer";
 import { displayName } from "../../utils/display-name";
 
 type Data = any;
@@ -10,12 +9,18 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.ALLOWED_ORIGINS ?? "*"
+  );
+
   if (req.method === "POST") {
-    const storeId = req.headers["x-store-id"];
+    const storeId: any = req.headers["x-store-id"];
+    const token = req.headers["x-token"];
+
     const { body } = req;
     const payload: any = {
       order_ref: body.order_ref,
-      store_id: storeId,
       rating: body.rating,
       status: "under_analysis",
       customer: body.customer,
@@ -34,27 +39,35 @@ export default async function handler(
     });
 
     if (payload.author) {
-      payload.display_name = displayName(payload.author)
+      payload.display_name = displayName(payload.author);
     }
 
-    const { data, error } = await supabase
-      .from("reviews")
-      .insert([payload])
-      .select("id");
+    const urlReviews = new URL("/v1/reviews", process.env.CORE_API);
 
-    if (data && data.length > 0) {
-      log.info("Avaliação criada com sucesso!", { body, payload});
-      const { error } = await supabase.rpc(
-        "add_review_id_to_notification_body",
-        {
-          store: storeId,
-          review: data[0].id,
-          notification: body.notification_id,
-        }
-      );
+    const options: any = {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-Store-Id": parseInt(storeId),
+        "X-Token": token,
+      },
+      body: JSON.stringify(payload),
+    };
 
-      res.status(201).json(data[0]);
-    } else if (error) {
+    try {
+      const response = await fetch(urlReviews, options);
+      const data = await response.json();
+
+      if (response.ok && response.status >= 200 && response.status <= 204) {
+        log.info("Avaliaçao criada com sucesso " + data, {
+          payload,
+          response,
+        });
+        res.status(201).json(data);
+      } else if (response.status >= 400) {
+        res.status(500).json(data);
+      }
+    } catch (error) {
       log.error("Erro ao criar a avaliacao", { body, error, payload });
       res.status(500).json(error);
     }

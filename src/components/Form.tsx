@@ -19,6 +19,7 @@ import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
 import { NotificationsHandle } from "./notifications";
 import RatingWrapper from "./RatingWrapper";
+import { useRouter } from "next/router";
 
 interface ProductsProps {
   ratingRef: any;
@@ -57,6 +58,7 @@ export default function Form({
 }: ProductsProps) {
   const [isLoading, __isLoading] = useState(false);
   const { author } = useContext<any>(AuthorContext);
+  const router = useRouter();
 
   const [pictures, setPictures] = useState<any>(null);
   const [video, setVideo] = useState<any>(null);
@@ -81,8 +83,8 @@ export default function Form({
   });
 
   async function createReview(values: any) {
-    const rating = getRating()
-    if (typeof rating !== 'number' || rating <= 0) {
+    const rating = getRating();
+    if (typeof rating !== "number" || rating <= 0) {
       setErrorRating(true);
       return;
     }
@@ -98,30 +100,39 @@ export default function Form({
 
     let url = "/api/reviews";
     let method = "POST";
+    let bodyApi = {
+      ...values,
+      rating: getRating(),
+    };
 
     if (reviewId) {
       url += `/${reviewId}/review`;
       method = "PATCH";
     }
 
-    //const url = "/api/reviews";
-    const req = await fetch(url, {
+    if (method === "POST") {
+      bodyApi = {
+        ...bodyApi,
+        order_ref: order,
+        product_id: product.product_id,
+        product_sku: product.sku,
+        customer: customer.id,
+        notification_id: notificationId,
+      };
+    }
+
+    const options: any = {
       method,
       headers: {
         "Content-Type": "application/json",
         "X-Store-Id": String(storeId),
+        "X-Token": router.query.t,
       },
 
-      body: JSON.stringify({
-        ...values,
-        order_ref: order,
-        product_id: product.product_id,
-        product_sku: product.sku,
-        rating: getRating(),
-        customer: customer.id,
-        notification_id: notificationId,
-      }),
-    });
+      body: JSON.stringify(bodyApi),
+    };
+
+    const req = await fetch(url, options);
 
     const uploads = async () => {
       const promises = [];
@@ -236,7 +247,7 @@ export default function Form({
         return "Enviar vídeo";
       }
 
-      return "Publicar Avaliação";
+      return "Enviar Avaliação";
     },
     [isLoading, step]
   );
@@ -315,8 +326,7 @@ export default function Form({
               variant="filled"
               mb="md"
             >
-              Escolha uma nota para o produto antes de enviar o
-              formulário.
+              Escolha uma nota para o produto antes de enviar o formulário.
             </Alert>
           </>
         )}
