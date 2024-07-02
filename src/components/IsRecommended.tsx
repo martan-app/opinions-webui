@@ -3,7 +3,6 @@ import { IconThumbDown, IconThumbUp } from "@tabler/icons-react";
 import {
   ForwardRefRenderFunction,
   forwardRef,
-  useEffect,
   useImperativeHandle,
   useState,
 } from "react";
@@ -28,33 +27,7 @@ const IsRecommended: ForwardRefRenderFunction<
     setValue: (value) => setValue(value),
   }));
 
-  // useEffect(() => {
-  //   typeof onChange === 'function' && onChange({
-  //     is_recommended: value === "sim"
-  //   })
-  // }, [onChange, value])
-
   return (
-    // <Radio.Group
-    //   value={value}
-    //   onChange={(value) => {
-    //     setValue(value);
-    //     typeof onChange === "function" &&
-    //       onChange({
-    //         is_recommended: value === "sim",
-    //       });
-    //   }}
-    //   name="is_recommeded"
-    //   label="Recomendaria o produto"
-    //   spacing="xl"
-    //   offset="sm"
-    //   size="lg"
-    //   mb="lg"
-    // >
-    //   <Radio value="sim" label="Sim" />
-    //   <Radio value="nao" label="Não" />
-    // </Radio.Group>
-
     <Group
       style={{
         flexDirection: "column",
@@ -63,7 +36,7 @@ const IsRecommended: ForwardRefRenderFunction<
       }}
     >
       <Text size="xl" fw={500} align="center">
-        Você recomendaria esse produto
+        Você recomendaria este produto?
       </Text>
 
       <Group

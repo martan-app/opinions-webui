@@ -12,15 +12,18 @@ import {
   Textarea,
 } from "@mantine/core";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
 import { AuthorContext } from "./../context/notification";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
+
 import Author from "./Author";
 import IsRecommended, { IsRecommendedHandle } from "./IsRecommended";
 import Product, { ProductHandle } from "./Product";
 import RatingWrapper, { RatingWrapperHandle } from "./RatingWrapper";
 import { UploadImage } from "./UploadImage";
 import { UploadVideo } from "./UploadVideo";
+import { useRouter } from "next/router";
 
 interface ProductsProps {
   product: any;
@@ -28,11 +31,13 @@ interface ProductsProps {
 }
 
 export default function ReviewForm({ product, notification }: ProductsProps) {
+  const router = useRouter();
+
   const [isLoading, __isLoading] = useState(false);
-  const [step, __step] = useState<string>("review");
-  const [reviewId, __reviewId] = useState<string | null>(null);
   const [hasReview, __hasReview] = useState(false);
   const [errorRating, setErrorRating] = useState(false);
+  const [step, __step] = useState<string>("review");
+  const [reviewId, __reviewId] = useState<string | null>(null);
 
   const [isRecommendedAux, setIsRecommendedAux] = useState<any>(null);
   const [ratingAux, setRatingAux] = useState<any>(null);
@@ -107,25 +112,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   async function createReview(props: any) {
-    const url = "/api/reviews";
-    const req = await apiRequest(url, "post", props);
-    const res = await req.json();
-
-    if (req.ok) {
-      __reviewId(res.id);
-    }
-  }
-
-  async function apiRequest(url: string, method: string, props: any) {
-    return fetch(url, {
-      method,
-
-      headers: {
-        "Content-Type": "application/json",
-        "X-Store-Id": String(notification.store_id),
-      },
-
-      body: JSON.stringify({
+    try {
+      const body = {
         ...props,
         author,
         order_ref: notification.order_id,
@@ -133,17 +121,45 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         product_sku: product.sku,
         customer: notification.customers.id,
         notification_id: notification.id,
-      }),
-    });
+      };
+      const url = "/api/reviews";
+      const req = await apiRequest(url, "POST", body);
+      if (req.ok) {
+        const res = await req.json();
+        __reviewId(res.id);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      __isLoading(false);
+    }
   }
 
   async function updateReview(props: any) {
     const url = `/api/reviews/${reviewId}/review`;
     try {
-      await apiRequest(url, "PATCH", props);
+      const body = {
+        ...props,
+        author,
+      };
+      await apiRequest(url, "PATCH", body);
     } catch (error) {
       console.error(error);
+    } finally {
+      __isLoading(false);
     }
+  }
+
+  async function apiRequest(url: string, method: string, bodyReq: any) {
+    return fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Store-Id": String(notification.store_id),
+        "X-Token": router.query.t,
+      } as any,
+      body: JSON.stringify(bodyReq),
+    });
   }
 
   async function submit(changeSteep: boolean = true) {
@@ -157,29 +173,38 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
 
     let url = "/api/reviews";
     let method = "POST";
+    let bodyApi: any = {
+      rating,
+    };
+
+    if (title) bodyApi["title"] = title;
+    if (body) bodyApi["body"] = body;
 
     if (reviewId) {
       url += `/${reviewId}/review`;
       method = "PATCH";
     }
 
+    if (method === "POST") {
+      bodyApi = {
+        ...bodyApi,
+        order_ref: notification.order_id,
+        product_id: product.product_id,
+        product_sku: product.sku,
+        customer: notification.customers.id,
+        notification_id: notification.id,
+      };
+    }
+
     const req = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
-        "X-Store-Id": String(notification.store_id),
-      },
+        "X-Store-Id": notification.store_id,
+        "X-Token": router.query.t,
+      } as any,
 
-      body: JSON.stringify({
-        title,
-        body,
-        order_ref: notification.order_id,
-        product_id: product.product_id,
-        product_sku: product.sku,
-        rating,
-        customer: notification.customers.id,
-        notification_id: notification.id,
-      }),
+      body: JSON.stringify(bodyApi),
     });
 
     if (reviewId) {
@@ -272,9 +297,9 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
 
       headers: {
         "Content-Type": "application/json",
-        "X-Token": "",
-        "X-Store-Id": String(notification.store_id),
-      },
+        "X-Store-Id": notification.store_id,
+        "X-Token": router.query.t,
+      } as any,
 
       body: JSON.stringify(pictures),
     });
@@ -287,9 +312,9 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
 
       headers: {
         "Content-Type": "application/json",
-        "X-Token": "",
-        "X-Store-Id": String(notification.store_id),
-      },
+        "X-Store-Id": notification.store_id,
+        "X-Token": router.query.t,
+      } as any,
 
       body: JSON.stringify(videoUrl),
     });
@@ -301,7 +326,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         return "Enviando..";
       }
 
-      return "Publicar Avaliação";
+      return "Enviar Avaliação";
     },
     [isLoading]
   );
@@ -336,11 +361,11 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           {errorRating && (
             <Alert
               title="Escolha uma nota para o produto"
-              color="red"
+              color="red.6"
               withCloseButton
               onClose={() => setErrorRating(false)}
               variant="filled"
-              mb="md"
+              mt="md"
             >
               Use as estrelas acima para dar nota ao produto
             </Alert>
@@ -353,6 +378,10 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
             }}
           />
 
+          <Text pb="xs" size="xl" fw={500} align="center">
+            Conte o que você achou do produto
+          </Text>
+
           <Textarea
             // placeholder="Pode ser curto tipo; fácil montagem, bem acabado, ótima embalagem de entrega, etc :)"
             placeholder={
@@ -362,7 +391,6 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
                 ? ""
                 : "Pode ser curto tipo; fácil montagem, bem acabado, ótima embalagem de entrega, etc :)"
             }
-            label="Conte o que você achou do produto"
             // description="Fale sobre o produto e evite comentar o atendimento ou outros serviços:"
             description=" "
             error={
@@ -403,7 +431,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
                 maxWidth: "100%",
                 width: "100%",
               }}
-              color="blue.8"
+              color="pink.7"
             >
               {buttonLabel()}
             </Button>
@@ -459,6 +487,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
               }}
               fullWidth
               size="lg"
+              color="pink.7"
               disabled={isLoading}
               variant="outline"
               onClick={() => {
@@ -474,12 +503,12 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
                 width: "50%",
               }}
               fullWidth
-              color="blue.8"
+              color="pink.7"
               size="lg"
               disabled={isLoading}
               onClick={uploads}
             >
-              {isLoading ? "Enviando.." : "Enviar"}
+              {isLoading ? "Enviando.." : "Finalizar"}
             </Button>
           </Flex>
         </div>
@@ -490,9 +519,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
             display: step === "success" ? "block" : "none",
           }}
         >
-          <Alert title="Enviado!" color="green" variant="light">
-            Sua avaliação foi enviada com sucesso! Te informaremos assim que for
-            publicada.
+          <Alert title="Enviado!" color="green.9" variant="light">
+            <Text size="md">Avaliação foi enviada com sucesso!</Text>
           </Alert>
         </div>
       </Card.Section>

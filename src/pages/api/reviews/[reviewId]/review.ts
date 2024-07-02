@@ -1,8 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from "next";
-import supabase from "./../../../../utils/supabase-client";
 import { log } from "@logtail/next";
-import { displayName } from "../../../../utils/display-name";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = any;
 
@@ -10,23 +8,44 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    process.env.ALLOWED_ORIGINS ?? "*"
+  );
   if (req.method === "PATCH") {
-    const { body, query } = req;
-    const payload = body
-    if (payload.author) {
-      payload.display_name = displayName(payload.author)
-    }
-    const { error } = await supabase
-      .from("reviews")
-      .update([body])
-      .eq("id", query.reviewId);
-    // res.setHeader('Content-Type', 'application/json')
-    if (!error) {
-      log.info("Avaliacao atualizada com sucesso!", { body, query });
-      res.status(204).end()
-    } else {
-      log.error("Erro ao atualizar a avaliacao", { body, error, query });
-      res.status(500).json(error)
+    const { body, query, headers } = req;
+    const storeId = headers["x-store-id"];
+    const token = headers["x-token"];
+
+    const urlReviews = new URL(
+      "/v1/reviews/" + query.reviewId,
+      process.env.CORE_API
+    );
+
+    const options: any = {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        "X-Store-Id": storeId,
+        "X-Token": token,
+      },
+      body: JSON.stringify(body),
+    };
+
+    try {
+      const response = await fetch(urlReviews, options);
+      if (response.ok) {
+        log.info("Avaliacao atualizada com sucesso!", {
+          body,
+          query,
+          response,
+        });
+        res.status(204).end();
+      }
+    } catch (error) {
+      console.error(error);
+      // log.error("Erro ao atualizar a avaliacao", { body, error, query });
+      res.status(500).json(error);
     }
   } else {
     res.status(405).json({

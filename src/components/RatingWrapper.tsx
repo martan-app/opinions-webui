@@ -50,27 +50,10 @@ const RatingWrapper: ForwardRefRenderFunction<
       </Text>
 
       {rating <= 0 && (
-        <Text size="xs" mb="md" mt="md" c="gray">
+        <Text size="xs" mt="xs" c="gray">
           Resposta obrigatória
         </Text>
       )}
-      {/* <Group>
-        <Rating
-          onChange={(r) => {
-            __rating(r);
-            typeof onRating === "function" && onRating(r);
-          }}
-          defaultValue={rating}
-          readOnly={isReadOnly}
-          size="xl"
-          mt="md"
-        />
-
-        <Text size="xl" fw={500}>
-          ({rating})
-        </Text>
-      </Group> */}
-
       <div role="group">
         <Rating
           value={rating}
@@ -105,12 +88,13 @@ const RatingWrapper: ForwardRefRenderFunction<
               style={
                 !isError
                   ? {
-                      opacity: index + 1 === rating ? 1 : 0.35,
+                      opacity: index + 1 === rating ? 1 : 0.59,
                       textDecoration:
                         index + 1 === rating ? "underline" : "inherit",
                       padding: "0 5%",
                       textAlign: "center",
                       cursor: "pointer",
+                      fontSize: "20px",
                     }
                   : {
                       // opacity: index + 1 === rating ? 1 : 0.35,
@@ -120,6 +104,7 @@ const RatingWrapper: ForwardRefRenderFunction<
                       textAlign: "center",
                       cursor: "pointer",
                       color: "red",
+                      fontSize: "20px",
                     }
               }
             >

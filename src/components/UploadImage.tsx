@@ -1,16 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Card,
-  Flex,
-  Grid,
-  Group,
-  Image,
-  Menu,
-  Text,
-} from "@mantine/core";
+import { Box, Button, Card, Grid, Group, Image, Text } from "@mantine/core";
 import {
   Dropzone,
   DropzoneProps,
@@ -19,11 +8,6 @@ import {
 } from "@mantine/dropzone";
 import { useState } from "react";
 import UploadImageWithImgKit from "./../lib/imageUploader";
-import {
-  IconCamera,
-  IconImageInPicture,
-  IconPictureInPicture,
-} from "@tabler/icons-react";
 
 interface Props extends DropzoneProps {
   onUpload?: (files: any) => void;
@@ -166,48 +150,13 @@ export function UploadImage(props: Partial<Props>) {
           spacing="xl"
           style={{ minHeight: 250, pointerEvents: "none" }}
         >
-          
           <Text c="gray" align="center" size="md" inline>
-          Arraste imagens ou toque para adicionar.
+            Arraste imagens ou toque para adicionar.
           </Text>
-          {/* <Text size="sm" color="dimmed" inline mt={7}>
-              Envie até 4 fotos do produto.
-            </Text> */}
         </Group>
       </Dropzone>
 
       <Grid mt={previews.length > 0 ? "xl" : 0}>{previews}</Grid>
-
-      {/* <Flex
-        mih={50}
-        gap="md"
-        justify="flex-end"
-        align="center"
-        direction="row"
-        wrap="wrap-reverse"
-        mt="md"
-      >
-        <Button
-          disabled={isLoading}
-          variant="outline"
-          onClick={() => {
-            if (onSkip) {
-              onSkip();
-            }
-          }}
-        >
-          Pular etapa
-        </Button>
-
-        <Button
-          disabled={isLoading}
-          onClick={() => {
-            upload().catch(console.error);
-          }}
-        >
-          {isLoading ? "Enviando.." : "Enviar"}
-        </Button>
-      </Flex> */}
     </Box>
   );
 }
