@@ -220,6 +220,7 @@ export async function getServerSideProps(context: any) {
       headers.append("X-Store-Id", decodedToken.store_id);
       headers.append("X-Token", query.t);
       headers.append("Content-Type", "application/json");
+      headers.append("User-Agent", "*");
 
       const reqOptions = {
         method: "get",
@@ -232,9 +233,8 @@ export async function getServerSideProps(context: any) {
       );
 
       const req = await fetch(urlReviews.toString(), reqOptions);
-
-      const res: any = await req.json();
-
+      const res: any = await req.text();
+      console.log({ res });
       if (!req.ok) {
         console.error("Opinions-Webui: Notifications Resquest Failed", {
           erroCode: 1799,
