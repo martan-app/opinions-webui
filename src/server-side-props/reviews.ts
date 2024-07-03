@@ -233,8 +233,8 @@ export async function getServerSideProps(context: any) {
       );
 
       const req = await fetch(urlReviews.toString(), reqOptions);
-      const res: any = await req.text();
-      console.log({ res });
+      const res: any = await req.json();
+
       if (!req.ok) {
         console.error("Opinions-Webui: Notifications Resquest Failed", {
           erroCode: 1799,
