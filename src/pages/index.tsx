@@ -11,7 +11,7 @@ import { LogoMartan } from "../components/LogoMartan";
 
 export default function Home(props: any) {
   const { __author } = useContext<any>(AuthorContext);
-  const { notification, decodedToken } = props;
+  const { notification } = props;
   const $alert = useRef<NotificationsHandle>(null);
   const [show, __show] = useState(false);
 
@@ -25,7 +25,7 @@ export default function Home(props: any) {
     __author(notification?.customers?.name);
   }, [__author, notification?.customers?.name]);
 
-  if (!notification || !decodedToken || !show) {
+  if (!notification || !show) {
     return null;
   }
 
