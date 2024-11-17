@@ -14,6 +14,8 @@ interface RecommendedProps {
 export type IsRecommendedHandle = {
   getValue: () => any;
   setValue: (rating: string) => void;
+  setDisabled: () => void;
+  setEnabled: () => void;
 };
 
 const IsRecommended: ForwardRefRenderFunction<
@@ -21,10 +23,13 @@ const IsRecommended: ForwardRefRenderFunction<
   RecommendedProps
 > = ({ onChange }, ref) => {
   const [value, setValue] = useState<string>("");
+  const [disabled, setDisabled] = useState<boolean>(false);
 
   useImperativeHandle(ref, () => ({
     getValue: () => value,
     setValue: (value) => setValue(value),
+    setDisabled: () => setDisabled(true),
+    setEnabled: () => setDisabled(false),
   }));
 
   return (
@@ -59,6 +64,7 @@ const IsRecommended: ForwardRefRenderFunction<
             width: "100%",
           }}
           leftIcon={<IconThumbUp />}
+          disabled={disabled}
         >
           Sim
         </Button>
@@ -76,6 +82,7 @@ const IsRecommended: ForwardRefRenderFunction<
             width: "100%",
           }}
           leftIcon={<IconThumbDown />}
+          disabled={disabled}
         >
           Não
         </Button>

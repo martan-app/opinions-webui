@@ -1,7 +1,6 @@
 /* eslint-disable react/display-name */
 import {
   Alert,
-  Box,
   Button,
   Card,
   Flex,
@@ -9,7 +8,7 @@ import {
   LoadingOverlay,
   Text,
   TextInput,
-  Textarea,
+  Textarea
 } from "@mantine/core";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -17,13 +16,13 @@ import { AuthorContext } from "./../context/notification";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
 
+import { useRouter } from "next/router";
 import Author from "./Author";
 import IsRecommended, { IsRecommendedHandle } from "./IsRecommended";
 import Product, { ProductHandle } from "./Product";
 import RatingWrapper, { RatingWrapperHandle } from "./RatingWrapper";
 import { UploadImage } from "./UploadImage";
 import { UploadVideo } from "./UploadVideo";
-import { useRouter } from "next/router";
 
 interface ProductsProps {
   product: any;
@@ -85,26 +84,26 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       IsRecommended = IsRecommended === "sim";
     }
 
-    reviewId
-      ? updateReview({
-          rating: value,
-          is_recommended: IsRecommended,
-        })
-      : createReview({
-          rating: value,
-          is_recommended: IsRecommended,
-        });
+    const body = {
+      rating: value,
+      is_recommended: IsRecommended,
+    }
+
+    return reviewId
+      ? updateReview(body)
+      : createReview(body);
   }
 
   function CreateOrUpdateWithIsRecommended(value: boolean) {
     setIsRecommendedAux(value);
     if (reviewId && $ratingWrapper?.current?.getRating() > 0) {
-      updateReview({
+      return updateReview({
         is_recommended: value,
         rating: $ratingWrapper?.current?.getRating(),
       });
-    } else if ($ratingWrapper?.current?.getRating() > 0) {
-      createReview({
+    }
+    if ($ratingWrapper?.current?.getRating() > 0) {
+      return createReview({
         is_recommended: value,
         rating: $ratingWrapper?.current?.getRating(),
       });
@@ -112,6 +111,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   async function createReview(props: any) {
+    $ratingWrapper?.current?.setDisabled();
+    $isRecommendedRef?.current?.setDisabled();
     try {
       const body = {
         ...props,
@@ -124,18 +125,31 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       };
       const url = "/api/reviews";
       const req = await apiRequest(url, "POST", body);
+      let reviewId = null;
       if (req.ok) {
         const res = await req.json();
+        reviewId = res.id;
         __reviewId(res.id);
       }
+      if (typeof window !== 'undefined' && 'clarity' in window) {
+        ;(window as any).clarity("event", "review_created", {
+          review_id: reviewId,
+        })
+      }
+      return req;
     } catch (error) {
       console.error(error);
+      throw error;
     } finally {
+      $ratingWrapper?.current?.setEnabled();
+      $isRecommendedRef?.current?.setEnabled();
       __isLoading(false);
     }
   }
 
   async function updateReview(props: any) {
+    $ratingWrapper?.current?.setDisabled();
+    $isRecommendedRef?.current?.setDisabled();
     const url = `/api/reviews/${reviewId}/review`;
     try {
       const body = {
@@ -145,7 +159,10 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       await apiRequest(url, "PATCH", body);
     } catch (error) {
       console.error(error);
+      throw error;
     } finally {
+      $ratingWrapper?.current?.setEnabled();
+      $isRecommendedRef?.current?.setEnabled();
       __isLoading(false);
     }
   }
@@ -326,7 +343,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         return "Enviando..";
       }
 
-      return "Enviar Avaliação";
+      return "Enviar minha avaliação";
     },
     [isLoading]
   );
@@ -352,7 +369,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           <RatingWrapper
             ref={$ratingWrapper}
             onRating={(value) => {
-              CreateOrUpdateWithRating(value);
+              CreateOrUpdateWithRating(value)
               setErrorRating(false);
             }}
             isError={errorRating}
@@ -374,7 +391,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           <IsRecommended
             ref={$isRecommendedRef}
             onChange={(value) => {
-              CreateOrUpdateWithIsRecommended(value === "sim");
+              CreateOrUpdateWithIsRecommended(value === "sim")
             }}
           />
 

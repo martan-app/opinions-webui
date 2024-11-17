@@ -247,7 +247,7 @@ export default function Form({
         return "Enviar vídeo";
       }
 
-      return "Enviar Avaliação";
+      return "Enviar minha avaliação";
     },
     [isLoading, step]
   );

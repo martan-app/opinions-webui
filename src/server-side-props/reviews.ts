@@ -27,7 +27,6 @@ export const getServerSideProps = withLogtailGetServerSideProps(
 
         const req = await fetch(urlReviews.toString(), reqOptions);
         const res: any = await req.json();
-
         if (!req.ok) {
           log.error("@Opinioes.Webui: Notifications Resquest Failed", {
             erroCode: 1799,
