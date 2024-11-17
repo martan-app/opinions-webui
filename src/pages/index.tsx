@@ -11,7 +11,7 @@ import { LogoMartan } from "../components/LogoMartan";
 
 export default function Home(props: any) {
   const { __author } = useContext<any>(AuthorContext);
-  const { notification, decodedToken } = props;
+  const { notification } = props;
   const $alert = useRef<NotificationsHandle>(null);
   const [show, __show] = useState(false);
 
@@ -25,10 +25,10 @@ export default function Home(props: any) {
     __author(notification?.customers?.name);
   }, [__author, notification?.customers?.name]);
 
-  if (!notification || !decodedToken || !show) {
+  if (!notification || !show) {
     return null;
   }
-  
+
   return (
     <Box
       sx={{
@@ -53,7 +53,7 @@ export default function Home(props: any) {
           <Logo src={notification.stores.logo_url} />
         )}
 
-        <Text p="xl" align="center">
+        <Text fz="xl" p="xl" align="center">
           {notification?.productBody?.length > 1
             ? "O que achou dos produtos?"
             : "O que achou do produto?"}{" "}
@@ -65,9 +65,8 @@ export default function Home(props: any) {
           notification={notification}
         />
 
-        <Text span p="xl" align="center">
-          © {new Date().getFullYear()} {notification?.stores?.name}. Todos os
-          direitos reservados.
+        <Text italic c="dimmed" span p="xs" align="center">
+          © {new Date().getFullYear()} {notification?.stores?.name}.
         </Text>
       </Flex>
 

@@ -26,8 +26,9 @@ interface RatingProps {
 
 export type RatingWrapperHandle = {
   getRating: () => any;
-  setReadOnly: () => void;
   setRating: (rating: number) => void;
+  setDisabled: () => void;
+  setEnabled: () => void;
 };
 
 const RatingWrapper: ForwardRefRenderFunction<
@@ -35,12 +36,13 @@ const RatingWrapper: ForwardRefRenderFunction<
   RatingProps
 > = ({ onRating, isError }, ref) => {
   const [rating, __rating] = useState(0);
-  const [isReadOnly, __isReadOnly] = useState(false);
+  const [isDisabled, __isDisabled] = useState(false);
 
   useImperativeHandle(ref, () => ({
     getRating: () => rating,
-    setReadOnly: () => __isReadOnly(true),
     setRating: (rating) => __rating(rating),
+    setDisabled: () => __isDisabled(true),
+    setEnabled: () => __isDisabled(false),
   }));
 
   return (
@@ -50,34 +52,17 @@ const RatingWrapper: ForwardRefRenderFunction<
       </Text>
 
       {rating <= 0 && (
-        <Text size="xs" mb="md" mt="md" c="gray">
+        <Text size="xs" mt="xs" c="gray">
           Resposta obrigatória
         </Text>
       )}
-      {/* <Group>
-        <Rating
-          onChange={(r) => {
-            __rating(r);
-            typeof onRating === "function" && onRating(r);
-          }}
-          defaultValue={rating}
-          readOnly={isReadOnly}
-          size="xl"
-          mt="md"
-        />
-
-        <Text size="xl" fw={500}>
-          ({rating})
-        </Text>
-      </Group> */}
-
       <div role="group">
         <Rating
           value={rating}
           // itemStyles={customStyles}
           onChange={(value: any) => {
-            __rating(value);
-            typeof onRating === "function" && onRating(value);
+            __rating(value)
+            typeof onRating === "function" && onRating(value)
           }}
           visibleLabelId={CUSTOM_GROUP_LABEL_ID}
           invisibleItemLabels={CUSTOM_ITEM_LABELS}
@@ -85,6 +70,7 @@ const RatingWrapper: ForwardRefRenderFunction<
           spaceInside="medium"
           transition="colors"
           isRequired
+          isDisabled={isDisabled}
         />
         <div
           style={{
@@ -96,21 +82,22 @@ const RatingWrapper: ForwardRefRenderFunction<
           {CUSTOM_ITEM_LABELS.map((label, index) => (
             <span
               onClick={() => {
-                __rating(CUSTOM_ITEM_LABELS_IDS[index]);
+                __rating(CUSTOM_ITEM_LABELS_IDS[index])
                 typeof onRating === "function" &&
-                  onRating(CUSTOM_ITEM_LABELS_IDS[index]);
+                  onRating(CUSTOM_ITEM_LABELS_IDS[index])
               }}
               key={label}
               id={"label_" + CUSTOM_ITEM_LABELS_IDS[index]}
               style={
                 !isError
                   ? {
-                      opacity: index + 1 === rating ? 1 : 0.35,
+                      opacity: index + 1 === rating ? 1 : 0.59,
                       textDecoration:
                         index + 1 === rating ? "underline" : "inherit",
                       padding: "0 5%",
                       textAlign: "center",
                       cursor: "pointer",
+                      fontSize: "20px",
                     }
                   : {
                       // opacity: index + 1 === rating ? 1 : 0.35,
@@ -120,6 +107,7 @@ const RatingWrapper: ForwardRefRenderFunction<
                       textAlign: "center",
                       cursor: "pointer",
                       color: "red",
+                      fontSize: "20px",
                     }
               }
             >
@@ -129,7 +117,7 @@ const RatingWrapper: ForwardRefRenderFunction<
         </div>
       </div>
     </Flex>
-  );
+  )
 };
 
 export default forwardRef(RatingWrapper);

@@ -4,9 +4,9 @@ import { MantineProvider } from "@mantine/core";
 import { AuthorContext } from "./../context/notification";
 import { useEffect, useState } from "react";
 import "./assets/style.css";
-import '@smastrom/react-rating/style.css'
+import "@smastrom/react-rating/style.css";
 import Script from "next/script";
-import { clarity } from 'react-microsoft-clarity';
+import { clarity } from "react-microsoft-clarity";
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props;
@@ -21,7 +21,7 @@ export default function App(props: AppProps) {
       e.preventDefault();
     });
 
-    clarity.init("kugnxhmp7p")
+    clarity.init("kugnxhmp7p");
   }, []);
 
   return (
@@ -48,7 +48,7 @@ export default function App(props: AppProps) {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-          
+
             gtag('config', 'G-HR4YE1LY6M');
             `}
       </Script>

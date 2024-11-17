@@ -1,100 +1,118 @@
+import { withLogtailGetServerSideProps } from "@logtail/next";
 import { verify } from "jsonwebtoken";
-import supabase from "../utils/supabase-client";
 
-export async function getServerSideProps(context: any) {
-  const { query } = context;
-  const token = process.env.NOTIFICATION_TOKEN ?? "";
-  let decodedToken: any = null;
+export const getServerSideProps = withLogtailGetServerSideProps(
+  async ({ log, query }: any) => {
+    const token = process.env.NOTIFICATION_TOKEN ?? "";
+    let decodedToken: any = null;
 
-  if (query.t && query.notification) {
-    try {
-      decodedToken = verify(query.t || "", token);
-    } catch (error) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-valid?reason=expired",
-        },
-      };
-    }
+    if (query.t && query.notification) {
+      try {
+        decodedToken = verify(query.t || "", token);
+        const headers = new Headers();
+        headers.append("X-Store-Id", decodedToken.store_id);
+        headers.append("X-Token", query.t);
+        headers.append("Content-Type", "application/json");
+        headers.append("User-Agent", "*");
 
-    const { data, error: notErr } = await supabase
-      .from("notifications")
-      .select(
-        `
-          id,
-          orders(id, order_id, products),
-          customers(name, id),
-          stores(name, url, logo_url,is_enable_video,is_enable_pictures,required_review_when_rating_is_less_than),
-          order_id,
-          store_id,
-          status,
-          token,
-          reviews
-        `
-      )
-      .eq("id", query.notification);
-    if (notErr || !data.length) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-found",
-        },
-      };
-    }
+        const reqOptions = {
+          method: "get",
+          headers,
+        };
 
-    if (
-      decodedToken.store_id !== data[0].store_id ||
-      query.t !== data[0].token
-    ) {
-      return {
-        redirect: {
-          permanent: false,
-          destination: "/not-valid?reason=storeId,token",
-        },
-      };
-    }
+        const urlReviews = new URL(
+          "/v1/notifications/" + query.notification,
+          process.env.CORE_API
+        );
 
-    const notificationBody: any = data[0];
-
-    if (notificationBody) {
-      const { data: products } = await supabase
-        .from("products")
-        .select("id, name, sku, url, pictures, product_id")
-        .in("id", notificationBody.orders.products);
-
-      if (products) {
-        notificationBody.productBody = products;
-      }
-
-      // reviews
-      if (notificationBody?.reviews?.length) {
-        const { data: reviews } = await supabase
-          .from("reviews")
-          .select("id, product_id, status, rating")
-          .in("id", notificationBody.reviews);
-
-        if (reviews && reviews.length > 0) {
-          notificationBody.reviews = reviews;
+        const req = await fetch(urlReviews.toString(), reqOptions);
+        const res: any = await req.json();
+        if (!req.ok) {
+          log.error("@Opinioes.Webui: Notifications Resquest Failed", {
+            erroCode: 1799,
+            req,
+            res,
+          });
+          console.error("@Opinioes.Webui: Notifications Resquest Failed", {
+            erroCode: 1799,
+            req,
+            res,
+          });
+          return {
+            redirect: {
+              permanent: false,
+              destination: "/error?reason=1799",
+            },
+          };
         }
+
+        if (decodedToken.store_id !== res.notification.store_id) {
+          log.error("@Opinioes.Webui: storeId diferente from token", {
+            erroCode: 1800,
+            res,
+            decodedToken,
+          });
+          console.error("@Opinioes.Webui: storeId diferente from token", {
+            erroCode: 1800,
+            res,
+            decodedToken,
+          });
+          return {
+            redirect: {
+              permanent: false,
+              destination: "/error?reason=1800",
+            },
+          };
+        }
+
+        let notificationBody: any = {
+          store_id: parseInt(decodedToken.store_id, 10),
+          id: query.notification,
+          order_ref: decodedToken.order_id,
+          order_id: decodedToken.order_id,
+        };
+
+        if (res.notification) {
+          if (res?.order?.products) {
+            notificationBody.productBody = res.order.products;
+          }
+
+          if (res?.reviews) {
+            notificationBody.reviews = res.reviews;
+          }
+
+          notificationBody.stores = res.store;
+          notificationBody.customers = res.customer;
+        }
+
+        return {
+          props: {
+            notification: notificationBody,
+          },
+        };
+      } catch (error: any) {
+        log.error("@Opinioes.Webui: request failed", {
+          erroCode: 1801,
+          error,
+        });
+        console.error("@Opinioes.Webui: request failed", {
+          erroCode: 1801,
+          error,
+        });
+        return {
+          redirect: {
+            permanent: false,
+            destination: "/error?reason=1801&e=" + JSON.stringify(error),
+          },
+        };
       }
     }
-
-    delete notificationBody.token
-    delete notificationBody.orders
 
     return {
-      props: {
-        notification: notificationBody,
-        decodedToken,
+      redirect: {
+        permanent: false,
+        destination: "/error?reason=1802",
       },
     };
   }
-
-  return {
-    redirect: {
-      permanent: false,
-      destination: "/not-found",
-    },
-  };
-}
+);

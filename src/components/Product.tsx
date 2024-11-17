@@ -61,6 +61,8 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         <Text
           sx={{
             // Static media query
+            fontSize: "20px",
+            textAlign: "center",
             "@media (max-width: 580px)": {
               fontSize: "14px",
             },
@@ -68,7 +70,7 @@ const Product: ForwardRefRenderFunction<ProductHandle, ProductProps> = (
         >
           {name}
         </Text>
-        
+
         {hasReview && (
           <Text size="sm" color="dimmed" weight={400}>
             <Rating
