@@ -35,11 +35,6 @@ export default async function handler(
     try {
       const response = await fetch(urlReviews, options);
       if (response.ok) {
-        log.info("Avaliacao atualizada com sucesso!", {
-          body,
-          query,
-          response,
-        });
         res.status(204).end();
       }
     } catch (error) {

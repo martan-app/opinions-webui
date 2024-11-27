@@ -59,10 +59,7 @@ export default async function handler(
       const data = await response.json();
 
       if (response.ok && response.status >= 200 && response.status <= 204) {
-        log.info("Avaliaçao criada com sucesso " + data, {
-          payload,
-          response,
-        });
+        log.info("Avaliaçao criada " + data.id);
         res.status(201).json(data);
       } else if (response.status >= 400) {
         res.status(500).json(data);
