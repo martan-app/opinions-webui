@@ -38,19 +38,11 @@ export default async function handler(
     try {
       const response = await fetch(urlReviews, options);
       if (response.ok) {
-        log.info("Fotos adicionada com sucesso a avaliacao!", {
-          body,
-          query,
-          response,
-        });
+        log.info("Fotos adicionada com sucesso a avaliacao!");
         res.status(204).end();
       }
     } catch (error) {
-      log.error("Erro ao adicionar as fotos na avaliacao", {
-        body,
-        error,
-        query,
-      });
+      log.error("Erro ao adicionar as fotos na avaliacao");
       res.status(500).json(error);
     }
   } else {
