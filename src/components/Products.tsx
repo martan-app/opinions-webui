@@ -1,8 +1,8 @@
 import ReviewForm from "./ReviewForm";
-
+import { Product, Notification } from "../types/interfaces";
 interface ProductsProps {
-  products: any[];
-  notification: any;
+  products: Product[];
+  notification: Notification;
 }
 
 export default function Products({ products, notification }: ProductsProps) {

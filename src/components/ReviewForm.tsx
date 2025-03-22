@@ -10,13 +10,14 @@ import {
   TextInput,
   Textarea
 } from "@mantine/core";
+import { useRouter } from "next/router"
+import { usePostHog } from "posthog-js/react"
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { AuthorContext } from "./../context/notification";
 import UploadImageWithImgKit from "./../lib/imageUploader";
 import imagekit from "./../utils/imagekit-client";
 
-import { useRouter } from "next/router";
 import Author from "./Author";
 import IsRecommended, { IsRecommendedHandle } from "./IsRecommended";
 import Product, { ProductHandle } from "./Product";
@@ -24,14 +25,16 @@ import RatingWrapper, { RatingWrapperHandle } from "./RatingWrapper";
 import { UploadImage } from "./UploadImage";
 import { UploadVideo } from "./UploadVideo";
 
+import { Notification, Product as ProductType } from "../types/interfaces";
+
 interface ProductsProps {
-  product: any;
-  notification: any;
+  product: ProductType;
+  notification: Notification;
 }
 
 export default function ReviewForm({ product, notification }: ProductsProps) {
   const router = useRouter();
-
+  const posthog = usePostHog();
   const [isLoading, __isLoading] = useState(false);
   const [hasReview, __hasReview] = useState(false);
   const [errorRating, setErrorRating] = useState(false);
@@ -65,7 +68,9 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         __hasReview(true);
       }
     }
-  }, [notification, product]);
+
+    posthog.group("store", notification.stores.name);
+  }, [notification, posthog, product]);
 
   function getPictureUrl() {
     let url = "https://img.icons8.com/ios/100/null/no-image.png";
@@ -76,6 +81,8 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   function CreateOrUpdateWithRating(value: number) {
+    $ratingWrapper?.current?.setDisabled()
+    $isRecommendedRef?.current?.setDisabled()
     setRatingAux(value);
     let IsRecommended = $isRecommendedRef?.current?.getValue();
     if (!IsRecommended) {
@@ -111,8 +118,6 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   async function createReview(props: any) {
-    $ratingWrapper?.current?.setDisabled();
-    $isRecommendedRef?.current?.setDisabled();
     try {
       const body = {
         ...props,
@@ -148,8 +153,6 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   }
 
   async function updateReview(props: any) {
-    $ratingWrapper?.current?.setDisabled();
-    $isRecommendedRef?.current?.setDisabled();
     const url = `/api/reviews/${reviewId}/review`;
     try {
       const body = {
@@ -224,20 +227,33 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
       body: JSON.stringify(bodyApi),
     });
 
+    let success = false;
     if (reviewId) {
       if (req.ok && req.status === 204) {
+        success = true;
         changeSteep && __step("media");
       }
     } else {
       const res = await req.json();
       if (req.ok) {
+        success = true;
         changeSteep && __step("media");
         __reviewId(res.id);
       } else if (!req.ok && req.status >= 400) {
         // onError(res);
       }
     }
-
+    const event = success ? "review_submitted_successfully" : "review_submitted_error";
+    posthog.capture(event, {
+      product_id: product.product_id,
+      notification_id: notification.id,
+      rating: rating,
+      title: title,
+      body: body,
+      is_recommended: isRecommendedAux,
+      pictures: pictures,
+      video: video,
+    })
     __isLoading(false);
   }
 
@@ -280,7 +296,11 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           },
         ],
       });
-
+      posthog.capture("video_uploaded", {
+        product_id: product.product_id,
+        notification_id: notification.id,
+        review_id: reviewId,
+      })
       if (url) {
         return updateReviewVideo(url);
       }
@@ -302,6 +322,11 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
     );
 
     await Promise.all(promises);
+    posthog.capture("pictures_uploaded", {
+      product_id: product.product_id,
+      notification_id: notification.id,
+      review_id: reviewId,
+    })
     return listOfPictures.length
       ? updateReviewPictures(listOfPictures)
       : Promise.resolve();
@@ -349,7 +374,17 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
   );
 
   return (
-    <Card shadow="sm" mb="lg" p="lg" radius="md" withBorder key={product.label}>
+    <Card
+      bg="#faf9f9"
+      shadow="lg"
+      mb="lg"
+      p="lg"
+      maw={700}
+      w="100%"
+      radius="md"
+      withBorder
+      key={product.product_id}
+    >
       <Card.Section p="lg" withBorder={!hasReview}>
         <Product
           name={product.name}
@@ -369,8 +404,10 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           <RatingWrapper
             ref={$ratingWrapper}
             onRating={(value) => {
-              CreateOrUpdateWithRating(value)
-              setErrorRating(false);
+              if (!isLoading) {
+                CreateOrUpdateWithRating(value)
+                setErrorRating(false)
+              }
             }}
             isError={errorRating}
           />
@@ -429,16 +466,21 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           <Author
             onChange={(authorName: string) => {
               if (authorName) {
-                __author(authorName);
+                __author(authorName)
               }
+              posthog.capture("author_changed", {
+                product_id: product.product_id,
+                notification_id: notification.id,
+                review_id: reviewId,
+              })
             }}
           />
 
           <Group position="center" mt="md" mb="mb" w="100%">
             <Button
               onClick={(e) => {
-                e.preventDefault();
-                if (!isLoading) submit(true).catch(console.error);
+                e.preventDefault()
+                if (!isLoading) submit(true).catch(console.error)
               }}
               fullWidth
               size="lg"
@@ -483,7 +525,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           {notification.stores?.is_enable_pictures && (
             <UploadImage
               onReady={(files: any) => {
-                __pictures(files);
+                __pictures(files)
               }}
             />
           )}
@@ -491,7 +533,7 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
           {notification.stores?.is_enable_video && (
             <UploadVideo
               onReady={(files: any) => {
-                __video(files);
+                __video(files)
               }}
             />
           )}
@@ -508,7 +550,12 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
               disabled={isLoading}
               variant="outline"
               onClick={() => {
-                __step("success");
+                __step("success")
+                posthog.capture("review_skipped", {
+                  product_id: product.product_id,
+                  notification_id: notification.id,
+                  review_id: reviewId,
+                })
               }}
             >
               Pular etapa
@@ -542,5 +589,5 @@ export default function ReviewForm({ product, notification }: ProductsProps) {
         </div>
       </Card.Section>
     </Card>
-  );
+  )
 }

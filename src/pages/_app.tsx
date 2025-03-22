@@ -1,28 +1,49 @@
-import { AppProps } from "next/app";
-import Head from "next/head";
-import { MantineProvider } from "@mantine/core";
-import { AuthorContext } from "./../context/notification";
-import { useEffect, useState } from "react";
-import "./assets/style.css";
-import "@smastrom/react-rating/style.css";
-import Script from "next/script";
-import { clarity } from "react-microsoft-clarity";
+import { MantineProvider } from "@mantine/core"
+import "@smastrom/react-rating/style.css"
+import { AppProps } from "next/app"
+import Head from "next/head"
+import { Router } from "next/router"
+import Script from "next/script"
+import posthog from "posthog-js"
+import { useEffect, useState } from "react"
+import { clarity } from "react-microsoft-clarity"
+import { AuthorContext } from "./../context/notification"
+import { PostHogProvider } from "posthog-js/react"
+import "./assets/style.css"
 
 export default function App(props: AppProps) {
-  const { Component, pageProps } = props;
-  const [author, __author] = useState("");
+  const { Component, pageProps } = props
+  const [author, __author] = useState("")
+
+  useEffect(() => {
+    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
+      api_host: "/ingest",
+      ui_host: "https://us.posthog.com",
+      loaded: (posthog) => {
+        if (process.env.NODE_ENV === "development") posthog.debug()
+      },
+    })
+
+    const handleRouteChange = () => posthog?.capture("$pageview")
+
+    Router.events.on("routeChangeComplete", handleRouteChange)
+
+    return () => {
+      Router.events.off("routeChangeComplete", handleRouteChange)
+    }
+  }, [])
 
   useEffect(() => {
     document.addEventListener("gesturestart", function (e) {
-      e.preventDefault();
-    });
+      e.preventDefault()
+    })
 
     document.addEventListener("touchmove", function (e) {
-      e.preventDefault();
-    });
+      e.preventDefault()
+    })
 
-    clarity.init("kugnxhmp7p");
-  }, []);
+    clarity.init("kugnxhmp7p")
+  }, [])
 
   return (
     <>
@@ -69,10 +90,12 @@ export default function App(props: AppProps) {
           colorScheme: "light",
         }}
       >
-        <AuthorContext.Provider value={{ author, __author }}>
-          <Component {...pageProps} />
-        </AuthorContext.Provider>
+        <PostHogProvider client={posthog}>
+          <AuthorContext.Provider value={{ author, __author }}>
+            <Component {...pageProps} />
+          </AuthorContext.Provider>
+        </PostHogProvider>
       </MantineProvider>
     </>
-  );
+  )
 }

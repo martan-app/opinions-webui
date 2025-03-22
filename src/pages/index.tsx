@@ -1,32 +1,51 @@
-import { Box, Button, Flex, Text } from "@mantine/core";
-import { useContext, useEffect, useRef, useState } from "react";
-import { Logo } from "../components/Logo";
-import Products from "../components/Products";
+import { Box, Flex, Text } from "@mantine/core"
+import { usePostHog } from "posthog-js/react"
+import { useContext, useEffect, useRef, useState } from "react"
+
+import { Logo } from "../components/Logo"
+import { LogoMartan } from "../components/LogoMartan"
+import Products from "../components/Products"
+
 import NotificationsComponent, {
   NotificationsHandle,
-} from "../components/notifications";
-import { AuthorContext } from "./../context/notification";
-import { getServerSideProps } from "../server-side-props/reviews";
-import { LogoMartan } from "../components/LogoMartan";
+} from "../components/notifications"
 
-export default function Home(props: any) {
-  const { __author } = useContext<any>(AuthorContext);
-  const { notification } = props;
-  const $alert = useRef<NotificationsHandle>(null);
-  const [show, __show] = useState(false);
+import { getServerSideProps } from "../server-side-props/reviews"
+
+import { AuthorContext } from "./../context/notification"
+
+interface HomeProps {
+  notification: any
+}
+
+export default function Home({ notification }: HomeProps) {
+  const [show, __show] = useState(false)
+  const posthog = usePostHog()
+
+  const { __author } = useContext<any>(AuthorContext)
+  const $alert = useRef<NotificationsHandle>(null)
 
   useEffect(() => {
     setTimeout(() => {
-      __show(true);
-    }, 100);
-  }, []);
+      __show(true)
+    }, 100)
+  }, [])
 
   useEffect(() => {
-    __author(notification?.customers?.name);
-  }, [__author, notification?.customers?.name]);
+    __author(notification?.customers?.name)
+  }, [__author, notification?.customers?.name])
+
+  useEffect(() => {
+    if (notification?.customers) {
+      const { id, name } = notification?.customers
+      posthog.identify(id, {
+        name,
+      })
+    }
+  }, [posthog, notification?.customers])
 
   if (!notification || !show) {
-    return null;
+    return null
   }
 
   return (
@@ -37,7 +56,7 @@ export default function Home(props: any) {
     >
       <Flex
         sx={{
-          maxWidth: "590px",
+          maxWidth: "700px",
           width: "100%",
           margin: "25px auto",
           //background: "#fff",
@@ -70,11 +89,11 @@ export default function Home(props: any) {
         </Text>
       </Flex>
 
-      <LogoMartan />
+      <LogoMartan store={notification?.stores?.name} />
 
       <NotificationsComponent ref={$alert} />
     </Box>
-  );
+  )
 }
 
-export { getServerSideProps };
+export { getServerSideProps }
