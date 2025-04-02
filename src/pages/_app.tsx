@@ -17,10 +17,12 @@ export default function App(props: AppProps) {
 
   useEffect(() => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
-      api_host: "/ingest",
+      api_host: "https://us.i.posthog.com",
       ui_host: "https://us.posthog.com",
       loaded: (posthog) => {
-        if (process.env.NODE_ENV === "development") posthog.debug()
+        if (process.env.NODE_ENV === "development") {
+          posthog.debug()
+        }
       },
     })
 
@@ -53,6 +55,7 @@ export default function App(props: AppProps) {
             ? `${pageProps?.notification?.stores?.name} - Avaliação de produtos`
             : "Martan.app - Avaliações"}
         </title>
+
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
@@ -74,19 +77,10 @@ export default function App(props: AppProps) {
             `}
       </Script>
 
-      {/* <Script id="clarity" strategy="lazyOnload" crossOrigin="use-credentials">
-        {`(function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "kugnxhmp7p");`}
-      </Script> */}
-
       <MantineProvider
         withGlobalStyles
         withNormalizeCSS
         theme={{
-          /** Put your mantine theme override here */
           colorScheme: "light",
         }}
       >
